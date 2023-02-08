@@ -73,14 +73,11 @@ clients who's object is not the same as the one sending
 the message """
 def broadcast(message, connection):
 	for client in list_of_clients:
-		print(client)
 		if client!=connection:
 			try:
-				print("broadcasting to " + client)
-				clients.send(message.encode('utf-8'))
+				client.send(message.encode('utf-8'))
 			except:
-				clients.close()
-
+				client.close()
 				# if the link is broken, we remove the client
 				remove(client)
 
