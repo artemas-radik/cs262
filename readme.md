@@ -53,5 +53,5 @@ Message Code | Message Type | Payload Format | Description
 ------------ | ------------ | ------------ | ------------ 
 6 | `err` | `256s` | Error message.
 7 | `suc` | `256s` | Success message.
-8 | `nms` | `256s` | New chat message.
+8 | `nms` | `16s512s` | New `512s` chat message from user `16s`.
 
