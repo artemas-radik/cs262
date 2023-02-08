@@ -3,12 +3,12 @@
 
 Replace cases of `10.250.243.199` with your private IP address, obtained by running `ipconfig getifaddr en0` on wireless networks and `ipconfig getifaddr en1` on wired networks.
 
-## Server
+### Server
 ```bash
 python3 server.py 10.250.243.199 5000
 ```
 
-## Client
+### Client
 ```bash
 python3 client.py 10.250.243.199 5000
 ```
@@ -21,3 +21,36 @@ We started the project today by following a guide for a similar project availabl
 3. Multiple clients from the same IP address not served properly (dropped messages).
 
 *We address Issue 1A by checking for the "server terminated" message (0 or an empty string) every time the client receives a message. Per advice [here](https://stackoverflow.com/questions/19795529/python-troubles-controlling-dead-sockets-through-select). Upon receiving the "server terminated" message, we terminate the client.*
+
+## Wire Protocol
+### Request Code Map
+*These messages are sent exclusively from the client to the server.*
+
+Message Code | Message Type | Payload Type
+------------ | ------------ | ------------ 
+0 | `reg` | `16s64s`
+1 | `del` | 
+2 | `acd` | 
+3 | `acf` | `16s`
+4 | `msg` | `16s512s`
+
+### Response Code Map
+*These messages are sent exclusively from the server to the client.*
+
+Message Code | Message Type | Payload Type
+------------ | ------------ | ------------ 
+5 | `err` | `256s`
+6 | `suc` | `256s`
+7 | `nms` | `256s`
+
+### Message Types
+
+###### Type `reg`
+
+Payload Element | Description
+------------ | ------------
+`16s` | Username
+`64s` | Password
+
+We use `reg` to indicate a client's intention to authenticate itself with the server. This can occur in one of two contexts:
+1. Client is registering an account with the server for the first time, so the client enters a brand new password 
