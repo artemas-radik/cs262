@@ -1,6 +1,8 @@
 # Getting Started
 *Tested on MacOS Ventura 13.2 with Python 3.9.6 Installed*
-## Server
+
+Replace cases of `10.250.243.199` with your private IP address, obtained by running `ipconfig getifaddr en0` on wireless networks and `ipconfig getifaddr en1` on wired networks.
+### Server
 ```bash
 python3 server.py 10.250.243.199 5000
 ```
