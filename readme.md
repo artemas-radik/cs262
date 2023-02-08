@@ -24,7 +24,7 @@ We started the project today by following a guide for a similar project availabl
 
 ## Wire Protocol
 
-We use Python's `Lib/struct.py` to encode and decode messages efficiently and safely between our client and server. 
+We use Python's `Lib/struct.py` to encode/decode messages efficiently and safely between our client and server. 
 
 ### Format Strings
 
