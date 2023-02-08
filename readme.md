@@ -20,4 +20,4 @@ We started the project today by following a guide for a similar project availabl
 2. Bytes not properly encoded/decoded to `utf-8` on both client and server side.
 3. Multiple clients from the same IP address not served properly (dropped messages).
 
-*We address Issue 1A by checking for the "server terminated" message (0 or an empty string) every time the client receives a message. Per advice [here](https://stackoverflow.com/questions/19795529/python-troubles-controlling-dead-sockets-through-select). Upon receiving the "server terminated" message, we terminate the client. *
+*We address Issue 1A by checking for the "server terminated" message (0 or an empty string) every time the client receives a message. Per advice [here](https://stackoverflow.com/questions/19795529/python-troubles-controlling-dead-sockets-through-select). Upon receiving the "server terminated" message, we terminate the client.*
