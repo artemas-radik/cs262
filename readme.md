@@ -30,13 +30,10 @@ We use Python's `Lib/struct.py` to encode/decode messages efficiently and safely
 
 > Format strings are the mechanism used to specify the expected layout when packing and unpacking data. They are built up from [Format Characters](https://docs.python.org/3.7/library/struct.html#format-characters), which specify the type of data being packed/unpacked.
 
-For convenience, below are the format characters used in this project.
+**Note that all strings in this project are `ascii` encoded.** Thus, a string's size is equivalent to its length in all cases, as one `ascii` character takes one byte to store. Checks are in place client side to prevent usage of non-`ascii` strings.
 
-
-> For the `'s'` format character, the count is interpreted as the length of the bytes, not a repeat count like for the other format characters; for example, `'10s'` means a single 10-byte string, while `'10c'`means 10 characters. If a count is not given, it defaults to 1. For packing, the string is truncated or padded with null bytes as appropriate to make it fit. For unpacking, the resulting bytes object always has exactly the specified number of bytes. 
-
-### Request Code Map
-*These messages are sent exclusively from the client to the server.*
+### Transfer Buffer
+The transfer buffer defines the structure of any and all messages exchanged between the client and server. We define the transfer buffer in this project as the union of a *Message Code* and a *Payload*. The first byte of any exchanged message is the *Message Code*, and the remaining bytes are the Payload. The *Message Code* has a Format Character of `B`, which maps to a C `unsigned char`. Each *Message Code* maps to a *Message Type*, which is an internal identifier introduced for accessibility and readibilty purposes. For instance, the client program labels it's commands via the associated *Message Type* that they broadcast. Message codes `0...5` are requests made by a client to the server, and message codes `6...8` are responses made by the server to a client. Each message code is described in detail below.
 
 Message Code | Message Type | Payload Format
 ------------ | ------------ | ------------ 
@@ -47,22 +44,8 @@ Message Code | Message Type | Payload Format
 4 | `acf` | `16s`
 5 | `msg` | `16s512s`
 
-### Response Code Map
-*These messages are sent exclusively from the server to the client.*
-
 Message Code | Message Type | Payload Format
 ------------ | ------------ | ------------ 
 6 | `err` | `256s`
 7 | `suc` | `256s`
 8 | `nms` | `256s`
-
-### Message Types
-
-###### Type `reg`
-
-Payload Element | Description
------------- | ------------
-`16s` | Username
-`64s` | Password
-
-We use `reg` to indicate a client's intention to create an account on the server.
