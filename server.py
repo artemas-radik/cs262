@@ -42,11 +42,12 @@ list_of_clients = []
 def clientthread(conn, addr):
 
 	# sends a message to the client whose user object is conn
-	conn.send(bytes("Welcome to this chatroom!", 'utf-8'))
+	conn.send("Welcome to this chatroom!".encode('utf-8'))
 
 	while True:
 			try:
-				message = conn.recv(2048)
+				message = conn.recv(2048).decode('utf-8')
+
 				if message:
 
 					"""prints the message and address of the
@@ -61,6 +62,7 @@ def clientthread(conn, addr):
 				else:
 					"""message may have no content if the connection
 					is broken, in this case we remove the connection"""
+					print("client conn broken")
 					remove(conn)
 
 			except:
@@ -70,15 +72,14 @@ def clientthread(conn, addr):
 clients who's object is not the same as the one sending
 the message """
 def broadcast(message, connection):
-	for clients in list_of_clients:
-		if clients!=connection:
+	for client in list_of_clients:
+		if client!=connection:
 			try:
-				clients.send(bytes(message, "utf-8"))
+				client.send(message.encode('utf-8'))
 			except:
-				clients.close()
-
+				client.close()
 				# if the link is broken, we remove the client
-				remove(clients)
+				remove(client)
 
 """The following function simply removes the object
 from the list that was created at the beginning of

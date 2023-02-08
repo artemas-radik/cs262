@@ -30,15 +30,9 @@ while server_running:
 
     for socks in read_sockets:
         if socks == server:
-            message = socks.recv(2048)
-            if message == b'': #Will an empty message from server trigger this if? Or will it be a '\n'
-                server_running = False #Assuming desired functionality is server terminates -> client terminates
-                break
-            print (message)
+            message = socks.recv(2048).decode('utf-8')
+            print(message.strip())
         else:
             message = sys.stdin.readline()
-            server.send(bytes(message, "utf-8"))
-            sys.stdout.write("<You>")
-            sys.stdout.write(message)
-            sys.stdout.flush()
+            server.send(message.encode('utf-8'))
 server.close()
