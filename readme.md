@@ -23,25 +23,28 @@ We started the project today by following a guide for a similar project availabl
 *We address Issue 1A by checking for the "server terminated" message (0 or an empty string) every time the client receives a message. Per advice [here](https://stackoverflow.com/questions/19795529/python-troubles-controlling-dead-sockets-through-select). Upon receiving the "server terminated" message, we terminate the client.*
 
 ## Wire Protocol
+
+
 ### Request Code Map
 *These messages are sent exclusively from the client to the server.*
 
-Message Code | Message Type | Payload Type
+Message Code | Message Type | Payload Format
 ------------ | ------------ | ------------ 
 0 | `reg` | `16s64s`
-1 | `del` | 
-2 | `acd` | 
-3 | `acf` | `16s`
-4 | `msg` | `16s512s`
+1 | `log` | `16s64s`
+2 | `del` | 
+3 | `acd` | 
+4 | `acf` | `16s`
+5 | `msg` | `16s512s`
 
 ### Response Code Map
 *These messages are sent exclusively from the server to the client.*
 
-Message Code | Message Type | Payload Type
+Message Code | Message Type | Payload Format
 ------------ | ------------ | ------------ 
-5 | `err` | `256s`
-6 | `suc` | `256s`
-7 | `nms` | `256s`
+6 | `err` | `256s`
+7 | `suc` | `256s`
+8 | `nms` | `256s`
 
 ### Message Types
 
@@ -52,5 +55,14 @@ Payload Element | Description
 `16s` | Username
 `64s` | Password
 
-We use `reg` to indicate a client's intention to authenticate itself with the server. This can occur in one of two contexts:
-1. Client is registering an account with the server for the first time, so the client enters a brand new password 
+We use `reg` to indicate a client's intention to create an account on the server.
+
+> Human beings face ever more complex and urgent problems, and their effectiveness in dealing with these problems is a matter that is critical to the stability and continued progress of society.
+
+ [!note]  Lorem ipsum dolor sit amet
+
+[!note] ddd
+dd
+
+> [!note] 
+> For the `'s'` format character, the count is interpreted as the length of the bytes, not a repeat count like for the other format characters; for example, `'10s'` means a single 10-byte string, while `'10c'`means 10 characters. If a count is not given, it defaults to 1. For packing, the string is truncated or padded with null bytes as appropriate to make it fit. For unpacking, the resulting bytes object always has exactly the specified number of bytes. As a special case, `'0s'` means a single, empty string (while`'0c'` means 0 characters).
