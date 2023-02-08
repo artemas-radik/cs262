@@ -15,8 +15,7 @@ server_running = True
 while server_running:
  
     # maintains a list of possible input streams
-    #sockets_list = [sys.stdin, server]
-    sockets_list = [server]
+    sockets_list = [sys.stdin, server]
  
     """ There are two possible input situations. Either the
     user wants to give manual input to send to other people,
