@@ -18,8 +18,21 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "c11e2e3c8bed34b7",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "readme.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -146,6 +159,8 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "46fba294d99e63a5",
-  "lastOpenFiles": []
+  "active": "c11e2e3c8bed34b7",
+  "lastOpenFiles": [
+    "readme.md"
+  ]
 }
