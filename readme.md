@@ -40,7 +40,7 @@ The transfer buffer defines the structure of any and all messages exchanged betw
 
 Message Code | Message Type | Payload Format | Description
 ------------ | ------------ | ------------ | ------------ 
-0 | `reg` | `16s64s` | Register with `16s` username & `64s` password.
+0 | `reg` | `16s64s` | Register with a `16s` username & `64s` password.
 1 | `log` | `16s64s` | Log in with a `16s` username & `64s` password.
 2 | `del` | | Delete account.
 3 | `acd` | | Dump all account names.
@@ -49,8 +49,9 @@ Message Code | Message Type | Payload Format | Description
 
 ##### Responses
 
-Message Code | Message Type | Payload Format
------------- | ------------ | ------------ 
-6 | `err` | `256s`
-7 | `suc` | `256s`
-8 | `nms` | `256s`
+Message Code | Message Type | Payload Format | Description
+------------ | ------------ | ------------ | ------------ 
+6 | `err` | `256s` | Error message.
+7 | `suc` | `256s` | Success message.
+8 | `nms` | `256s` | New chat message.
+
