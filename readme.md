@@ -1,6 +1,7 @@
 ## Getting Started
 *Tested on MacOS Ventura 13.2 with Python 3.9.6 Installed*
 ### Server
+Replace `10.250.243.199` with your private IP address.
 ```bash
 python3 server.py 10.250.243.199 5000
 ```
