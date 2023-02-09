@@ -38,20 +38,20 @@ The transfer buffer defines the structure of any and all messages exchanged betw
 
 ##### Requests 
 
-Message Code | Message Type | Payload Format | Description | Parameters
------------- | ------------ | ------------ | ------------ | ------------ 
-0 | `reg` | `16s64s` | Register account. | username:`16s`, password:`64s`
-1 | `log` | `16s64s` | Log in existing account. | username:`16s`, password:`64s`
-2 | `del` | | Delete account. |
-3 | `acd` | | Dump all account names. |
-4 | `acf` | `16s` | Filter account names. | wildcard:`16s`
-5 | `msg` | `16s512s` | Send a chat message to a user. | to_username:`16s`, content:`512s`
+Message Code | Message Type | Description | Payload Parameters
+------------ | ------------ | ------------ | ------------
+0 | `reg` | Register account. | username:`16s` password:`64s`
+1 | `log` | Log in existing account. | username:`16s`, password:`64s`
+2 | `del` | Delete account. |
+3 | `acd` | Dump all account names. |
+4 | `acf` | Filter account names. | wildcard:`16s`
+5 | `msg` | Send a chat message to a user. | to_username:`16s`, content:`512s`
 
 ##### Responses
 
-Message Code | Message Type | Payload Format | Description | Parameters
+Message Code | Message Type | Description | Parameters
 ------------ | ------------ | ------------ | ------------ | ------------ 
-6 | `err` | `256s` | Error message. | message:`256s`
-7 | `suc` | `256s` | Success message. | message:`256s`
-8 | `nms` | `16s512s` | New chat message. | from_username:`16s`, content:`512s`
+6 | `err` | Error message. | message:`256s`
+7 | `suc` | Success message. | message:`256s`
+8 | `nms` | New chat message. | from_username:`16s`, content:`512s`
 
