@@ -82,7 +82,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "0f4a319444155603",
@@ -159,7 +160,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "c11e2e3c8bed34b7",
+  "active": "afac31c781d6bd1d",
   "lastOpenFiles": [
     "readme.md"
   ]
