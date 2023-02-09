@@ -50,7 +50,7 @@ Message Code | Message Type | Description | Payload Parameters
 ##### Responses
 
 Message Code | Message Type | Description | Parameters
------------- | ------------ | ------------ | ------------ | ------------ 
+------------ | ------------ | ------------ | ------------
 6 | `err` | Error message. | message:`256s`
 7 | `suc` | Success message. | message:`256s`
 8 | `nms` | New chat message. | from_username:`16s`, content:`512s`
