@@ -40,7 +40,7 @@ The transfer buffer defines the structure of any and all messages exchanged betw
 
 Message Code | Message Type | Description | Payload Parameters
 ------------ | ------------ | ------------ | ------------
-0 | `reg` | Register account. | username:`16s` password:`64s`
+0 | `reg` | Register account. | username:`16s`, password:`64s`
 1 | `log` | Log in existing account. | username:`16s`, password:`64s`
 2 | `del` | Delete account. |
 3 | `acd` | Dump all account names. |
