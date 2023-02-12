@@ -36,7 +36,7 @@ def encode(command):
         case Payload.deleteacc.name:
             return Payload.deleteacc.value.to_bytes(1, 'big')
         case Payload.accdump.name:
-            return Payload.deleteacc.value.to_bytes(1, 'big')
+            return Payload.accdump.value.to_bytes(1, 'big')
         case Payload.accfilter.name:
             return Payload.login.value.to_bytes(1, 'big') + len(elements[1]).to_bytes(2, 'big') + elements[1].encode('ascii')
         case Payload.message.name:

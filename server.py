@@ -4,6 +4,8 @@ import sys
 from _thread import *
 from enum import Enum
 
+accounts = []
+
 class Payload(Enum):
     register = 0
     login = 1
@@ -15,27 +17,75 @@ class Payload(Enum):
     success = 7
     newmessage = 8
 
+class Account:
+	def __init__(self, username, password):
+		self.username = username
+		self.password = password
+
+	def message(self, sender, content):
+		self.socket.send(Payload.register.value.to_bytes(1, 'big') + len(sender).to_bytes(2, 'big') + sender.encode('ascii') + len(content).to_bytes(2, 'big') + content.encode('ascii'))
+
 def encode(response, message):
     return response.value.to_bytes(1, 'big') + len(message).to_bytes(2, 'big') + message.encode('ascii')
 
-def decode(buffer):
+def decode(buffer, socket):
 	print('decode triggered')
 	match buffer[0]:
 		case Payload.register.value:
-			print('reg triggered')
 			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
 			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
-			print(f"{username} {password}")
-		case Payload.login.name:
+
+			for account in accounts:
+				if account.username == username:
+					socket.send(encode(Payload.error, "Username already registered."))
+					return
+
+			accounts.append(Account(username, password))
+			socket.send(encode(Payload.success, f"Registered {username}."))
+
+		case Payload.login.value:
+			print('login triggered')
 			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
 			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
-		case Payload.deleteacc.name:
+
+			for account in accounts:
+				if account.username == username:
+					if account.password == password:
+						account.socket = socket
+						socket.send(encode(Payload.success, f"Authenticated {username}."))
+						return
+					else:
+						socket.send(encode(Payload.error, f"Wrong password."))
+
+			socket.send(encode(Payload.error, f"Username not found."))
+
+		case Payload.deleteacc.value:
+
+			for account in accounts:
+				if account.socket == socket:
+					accounts.remove(account)
+					socket.send(encode(Payload.success, f"Account deleted."))
+					return
+			
+			socket.send(encode(Payload.error, f"Not authenticated."))
+
 			pass
-		case Payload.accdump.name:
+		case Payload.accdump.value:
+
+			if accounts:
+				dump = "Users: "
+				for account in accounts:
+					dump += f"{account.username}, "
+				socket.send(encode(Payload.success, dump[:-2]+"."))
+				return
+			else:
+				socket.send(encode(Payload.error, "No accounts found."))
+				return
+
+		case Payload.accfilter.value:
 			pass
-		case Payload.accfilter.name:
-			wildcard = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
-		case Payload.message.name:
+
+		case Payload.message.value:
 			to = username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
 			content = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
 		case _:
@@ -43,13 +93,7 @@ def decode(buffer):
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-if len(sys.argv) != 3:
-	print ("Correct usage: script, IP address, port number")
-	exit()
-
 IP_address = str(sys.argv[1])
-
 Port = int(sys.argv[2])
 server.bind((IP_address, Port))
 server.listen(100)
@@ -60,7 +104,9 @@ def clientthread(conn, addr):
 	suc(conn, "Welcome to this chatroom!")
 	while True:
 			try:
-				message = decode(conn.recv(4096))
+				data = conn.recv(4096)
+				if not data: break
+				message = decode(data, conn)
 				if message:
 					print ("<" + addr[0] + "> " + message.strip())
 					message_to_send = "<" + addr[0] + "> " + message
