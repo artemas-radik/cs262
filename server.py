@@ -4,7 +4,7 @@ import sys
 from _thread import *
 from enum import Enum
 
-accounts = []
+accounts = {}
 
 class Payload(Enum):
     register = 0
@@ -18,8 +18,7 @@ class Payload(Enum):
     newmessage = 8
 
 class Account:
-	def __init__(self, username, password):
-		self.username = username
+	def __init__(self, password):
 		self.password = password
 
 	def message(self, sender, content):
@@ -29,53 +28,41 @@ def encode(response, message):
     return response.value.to_bytes(1, 'big') + len(message).to_bytes(2, 'big') + message.encode('ascii')
 
 def decode(buffer, socket):
-	print('decode triggered')
 	match buffer[0]:
 		case Payload.register.value:
 			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
 			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
-
-			for account in accounts:
-				if account.username == username:
-					socket.send(encode(Payload.error, "Username already registered."))
-					return
-
-			accounts.append(Account(username, password))
+			if username in accounts.keys():
+				socket.send(encode(Payload.error, "Username already registered."))
+				return
+			accounts[username] = Account(password)
 			socket.send(encode(Payload.success, f"Registered {username}."))
 
 		case Payload.login.value:
-			print('login triggered')
 			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
 			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
-
-			for account in accounts:
-				if account.username == username:
-					if account.password == password:
-						account.socket = socket
-						socket.send(encode(Payload.success, f"Authenticated {username}."))
-						return
-					else:
-						socket.send(encode(Payload.error, f"Wrong password."))
-
+			if username in accounts.keys():
+				if accounts[username].password == password:
+					accounts[username].socket = socket
+					socket.send(encode(Payload.success, f"Authenticated {username}."))
+					return
+				else:
+					socket.send(encode(Payload.error, f"Wrong password."))
 			socket.send(encode(Payload.error, f"Username not found."))
 
 		case Payload.deleteacc.value:
-
-			for account in accounts:
-				if account.socket == socket:
-					accounts.remove(account)
+			for account in accounts.keys():
+				if accounts[account].socket == socket:
+					del accounts[account]
 					socket.send(encode(Payload.success, f"Account deleted."))
 					return
-			
 			socket.send(encode(Payload.error, f"Not authenticated."))
 
-			pass
 		case Payload.accdump.value:
-
 			if accounts:
 				dump = "Users: "
 				for account in accounts:
-					dump += f"{account.username}, "
+					dump += f"{account}, "
 				socket.send(encode(Payload.success, dump[:-2]+"."))
 				return
 			else:
