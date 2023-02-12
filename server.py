@@ -2,6 +2,44 @@ import socket
 import select
 import sys
 from _thread import *
+from enum import Enum
+
+class Payload(Enum):
+    register = 0
+    login = 1
+    deleteacc = 2
+    accdump = 3
+    accfilter = 4
+    message = 5
+    error = 6
+    success = 7
+    newmessage = 8
+
+def encode(response, message):
+    return response.value.to_bytes(1, 'big') + len(message).to_bytes(2, 'big') + message.encode('ascii')
+
+def decode(buffer):
+	print('decode triggered')
+	match buffer[0]:
+		case Payload.register.value:
+			print('reg triggered')
+			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
+			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
+			print(f"{username} {password}")
+		case Payload.login.name:
+			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
+			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
+		case Payload.deleteacc.name:
+			pass
+		case Payload.accdump.name:
+			pass
+		case Payload.accfilter.name:
+			wildcard = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
+		case Payload.message.name:
+			to = username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
+			content = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
+		case _:
+			print("[FAILURE] Incorrect command usage.")
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -22,7 +60,7 @@ def clientthread(conn, addr):
 	suc(conn, "Welcome to this chatroom!")
 	while True:
 			try:
-				message = conn.recv(2048).decode('utf-8')
+				message = decode(conn.recv(4096))
 				if message:
 					print ("<" + addr[0] + "> " + message.strip())
 					message_to_send = "<" + addr[0] + "> " + message
