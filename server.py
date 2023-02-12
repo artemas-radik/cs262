@@ -1,6 +1,5 @@
 import socket
 import select
-import struct
 import sys
 from _thread import *
 
@@ -50,7 +49,9 @@ def err(client, message):
 	client.send(struct.pack('B256s', 6, message.encode('ascii')))
 
 def suc(client, message):
-	client.send(struct.pack('B256s272x', 7, message.encode('ascii')))
+	qwdee = (7).to_bytes(1, 'big') + len(message).to_bytes(2, 'big') + message.encode('ascii')
+	print(qwdee)
+	client.send(qwdee)
 
 def nms(client, from_username, content):
 	client.send(struct.pack('B16s512s', 8, from_username.strip().encode('ascii'), content.strip().encode('ascii')))
