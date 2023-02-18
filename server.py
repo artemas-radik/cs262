@@ -1,9 +1,97 @@
 # Python program to implement server side of chat room.
 import socket
 import select
+import re
 import sys
 '''Replace "thread" with "_thread" for python 3'''
 from _thread import *
+from enum import Enum
+
+accounts = {}
+
+class Payload(Enum):
+    register = 0
+    login = 1
+    deleteacc = 2
+    accdump = 3
+    accfilter = 4
+    message = 5
+    error = 6
+    success = 7
+    newmessage = 8
+
+class Account:
+	def __init__(self, password):
+		self.password = password
+
+	def message(self, sender, content):
+		self.socket.send(Payload.register.value.to_bytes(1, 'big') + len(sender).to_bytes(2, 'big') + sender.encode('ascii') + len(content).to_bytes(2, 'big') + content.encode('ascii'))
+
+def encode(response, message):
+    return response.value.to_bytes(1, 'big') + len(message).to_bytes(2, 'big') + message.encode('ascii')
+
+def decode(buffer, socket):
+	match buffer[0]:
+		case Payload.register.value:
+			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
+			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
+			if username in accounts.keys():
+				socket.send(encode(Payload.error, "Username already registered."))
+				return
+			accounts[username] = Account(password)
+			socket.send(encode(Payload.success, f"Registered {username}."))
+
+		case Payload.login.value:
+			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
+			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
+			if username in accounts.keys():
+				if accounts[username].password == password:
+					accounts[username].socket = socket
+					socket.send(encode(Payload.success, f"Authenticated {username}."))
+					return
+				else:
+					socket.send(encode(Payload.error, f"Wrong password."))
+			socket.send(encode(Payload.error, f"Username not found."))
+
+		case Payload.deleteacc.value:
+			for account in accounts.keys():
+				if accounts[account].socket == socket:
+					del accounts[account]
+					socket.send(encode(Payload.success, f"Account deleted."))
+					return
+			socket.send(encode(Payload.error, f"Not authenticated."))
+
+		case Payload.accdump.value:
+			if accounts:
+				dump = "Users: "
+				for account in accounts:
+					dump += f"{account}, "
+				socket.send(encode(Payload.success, dump[:-2]+"."))
+				return
+			else:
+				socket.send(encode(Payload.error, "No accounts found."))
+				return
+
+		case Payload.accfilter.value:
+			wildcard = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii') #why extra processing?
+			if accounts:
+				r = re.compile(wildcard)
+				filtered_accs = list(filter(r.match, accounts)) #thanks https://stackoverflow.com/questions/3640359/regular-expressions-search-in-list
+				if not len(filtered_accs):
+					socket.send(encode(Payload.success, "No matching accounts."))
+				else:
+					dump = f"Matching Users: {', '.join(str(s) for s in filtered_accs)}." #thanks https://www.reddit.com/r/learnpython/comments/l10k8h/is_there_a_way_to_unpack_a_list_with_f_stings/ 
+					socket.send(encode(Payload.success, dump))
+				return
+			else:
+				socket.send(encode(Payload.error, "No accounts found."))
+				return
+
+		case Payload.message.value:
+			to = username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
+			content = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
+		case _:
+			print("[FAILURE] Incorrect command usage.")
 
 """The first argument AF_INET is the address domain of the
 socket. This is used when we have an Internet Domain with

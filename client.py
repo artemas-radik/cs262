@@ -1,44 +1,60 @@
-# Python program to implement client side of chat room.
 import socket
 import select
 import sys
- 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-if len(sys.argv) != 3:
-    print ("Correct usage: script, IP address, port number")
-    exit()
-IP_address = str(sys.argv[1])
-Port = int(sys.argv[2])
-server.connect((IP_address, Port))
+from enum import Enum
 
-server_running = True
-while server_running:
+class Payload(Enum):
+    register = 0
+    login = 1
+    deleteacc = 2
+    accdump = 3
+    accfilter = 4
+    message = 5
+    error = 6
+    success = 7
+    newmessage = 8
  
-    # maintains a list of possible input streams
-    #sockets_list = [sys.stdin, server]
-    sockets_list = [server]
- 
-    """ There are two possible input situations. Either the
-    user wants to give manual input to send to other people,
-    or the server is sending a message to be printed on the
-    screen. Select returns from sockets_list, the stream that
-    is reader for input. So for example, if the server wants
-    to send a message, then the if condition will hold true
-    below.If the user wants to send a message, the else
-    condition will evaluate as true"""
+def decode(buffer):
+    match buffer[0]:
+        case Payload.error.value:
+            return f"[WARNING] {buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')}"
+        case Payload.success.value:
+            return f"[SUCCESS] {buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')}"
+        case Payload.newmessage.value:
+            return f"[MESSAGE] <{buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')}> {buffer[int.from_bytes(buffer[1:3],'big')+3:]}"
+        case _:
+            sys.exit(f"[FAILURE] Undecodable transfer buffer received.")
+
+def encode(command):
+    elements = command.split(' ')
+    # TODO: Check fields to make sure they fit in types.
+    match elements[0]:
+        case Payload.register.name:
+            return Payload.register.value.to_bytes(1, 'big') + len(elements[1]).to_bytes(2, 'big') + elements[1].encode('ascii') + len(elements[2]).to_bytes(2, 'big') + elements[2].encode('ascii')
+        case Payload.login.name:
+            return Payload.login.value.to_bytes(1, 'big') + len(elements[1]).to_bytes(2, 'big') + elements[1].encode('ascii') + len(elements[2]).to_bytes(2, 'big') + elements[2].encode('ascii')
+        case Payload.deleteacc.name:
+            return Payload.deleteacc.value.to_bytes(1, 'big')
+        case Payload.accdump.name:
+            return Payload.accdump.value.to_bytes(1, 'big')
+        case Payload.accfilter.name:
+            return Payload.accfilter.value.to_bytes(1, 'big') + len(elements[1]).to_bytes(2, 'big') + elements[1].encode('ascii')
+        case Payload.message.name:
+            return Payload.login.value.to_bytes(1, 'big') + len(elements[1]).to_bytes(2, 'big') + elements[1].encode('ascii') + len(elements[2]).to_bytes(2, 'big') + elements[2].encode('ascii')
+        case _:
+            print("[FAILURE] Incorrect command usage.")
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+ip = str(sys.argv[1])
+port = int(sys.argv[2])
+server.connect((ip, port))
+
+while True:
+    sockets_list = [sys.stdin, server]
     read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
 
     for socks in read_sockets:
         if socks == server:
-            message = socks.recv(2048)
-            if message == b'': #Will an empty message from server trigger this if? Or will it be a '\n'
-                server_running = False #Assuming desired functionality is server terminates -> client terminates
-                break
-            print (message)
+            message = print(decode(socks.recv(4096)))
         else:
-            message = sys.stdin.readline()
-            server.send(bytes(message, "utf-8"))
-            sys.stdout.write("<You>")
-            sys.stdout.write(message)
-            sys.stdout.flush()
-server.close()
+            server.send(encode(sys.stdin.readline().strip()))
