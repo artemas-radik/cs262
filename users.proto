@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+message registerUser {
+    string username = 1;
+    string password = 2;
+    requestReply reply = 3;
+}
+
+message loginUser {
+    string username = 1;
+    string password = 2;
+    requestReply reply = 3;
+}
+
+message deleteUser {
+    string username = 1;
+    string from_user = 2;
+    requestReply reply = 3;
+}
+
+message dumpUsers {
+    requestReply reply = 1;
+}
+
+message filterUsers {
+    string wildcard = 1;
+    requestReply reply = 2;
+}
+
+message requestReply {
+    string reply = 1; //repeated string usersList
+}
+
+service UserTable {
+    rpc RegisterUser (registerUser) returns (requestReply);
+    rpc LoginUser (loginUser) returns (requestReply);
+    rpc DeleteUser (deleteUser) returns (requestReply);
+    
+    rpc DumpUsers (dumpUsers) returns (requestReply);
+    rpc FilterUsers (filterUsers) returns (requestReply);
+}

@@ -44,17 +44,19 @@ def encode(command):
         case _:
             print("[FAILURE] Incorrect command usage.")
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ip = str(sys.argv[1])
-port = int(sys.argv[2])
-server.connect((ip, port))
 
-while True:
-    sockets_list = [sys.stdin, server]
-    read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
+if __name__ == "__main__":
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ip = str(sys.argv[1])
+    port = int(sys.argv[2])
+    server.connect((ip, port))
 
-    for socks in read_sockets:
-        if socks == server:
-            message = print(decode(socks.recv(4096)))
-        else:
-            server.send(encode(sys.stdin.readline().strip()))
+    while True:
+        sockets_list = [sys.stdin, server]
+        read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
+
+        for socks in read_sockets:
+            if socks == server:
+                message = print(decode(socks.recv(4096)))
+            else:
+                server.send(encode(sys.stdin.readline().strip()))
