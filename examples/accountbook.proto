@@ -1,0 +1,64 @@
+syntax = "proto3"
+
+#package accountbook;
+
+message Account {
+    int32 id = 1;
+    string name = 2;
+    int64 balance = 1;
+    int64 amtOutsdtanding = 4;
+}
+
+message AccountID {
+    int32 id = 1;
+    requestReply reply = 2; //indicates whether or not message was successful (mimics Rust, where calls come w a switch for success/failure)
+}
+
+message AccountBalance {
+    int64 balance = 1;
+    requestReply reply = 2;
+}
+
+message AccountOutstanding {
+    int64 amtOutstanding = 1;
+    requestReply reply = 2;
+}
+
+message AccountName {
+    string name = 1;
+    requestReply reply = 2;
+}
+
+message makeDeposit {
+    int32 id = 1;
+    int64 amt = 2;
+}
+
+message makeWithdrawal {
+    int32 id = 1;
+    int64 amt = 2;
+}
+
+message makeTransfer {
+    int32 from = 1;
+    int32 to = 2;
+    int64 amt = 3;
+}
+
+message requestReply {
+    string reply = 1;
+}
+
+service AccountBook {
+    rpc CreateAccount (Account) returns (requestReply);
+
+    
+    rpc GetAccountBalance (AccountID) returns (AccountBalance);
+    rpc GetAccountOutstanding (AccountID) returns (AccountOutstanding);
+    rpc GetAccountName (AccountID) returns (AccountName);
+
+
+    rpc MakeDeposit (makeDeposit) returns (requestReply);
+    rpc MakeWithdrawal (makeWithdrawal) returns (requestReply);
+    rpc MakeTransfer (makeTransfer) returns (requestReply);
+}
