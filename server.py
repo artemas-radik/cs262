@@ -3,77 +3,126 @@ import select
 import sys
 import re
 from _thread import *
+from enum import Enum
 
-"""The first argument AF_INET is the address domain of the
-socket. This is used when we have an Internet Domain with
-any two hosts The second argument is the type of socket.
-SOCK_STREAM means that data or characters are read in
-a continuous flow."""
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+#Bad functionality:
+	#if there is a bad delete command, user gets logged out?
+	#deleteacc doesn't give us any verbal validation
 
-# checks whether sufficient arguments have been provided
-if len(sys.argv) != 3:
-	print ("Correct usage: script, IP address, port number")
-	exit()
+accounts = {}
 
-# takes the first argument from command prompt as IP address
-IP_address = str(sys.argv[1])
+class Payload(Enum):
+    register = 0
+    login = 1
+    deleteacc = 2
+    accdump = 3
+    accfilter = 4
+    message = 5
+    error = 6
+    success = 7
+    newmessage = 8
 
-# takes second argument from command prompt as port number
-Port = int(sys.argv[2])
+class Account:
+	def __init__(self, password):
+		self.password = password
 
-"""
-binds the server to an entered IP address and at the
-specified port number.
-The client must be aware of these parameters
-"""
-server.bind((IP_address, Port))
+	def message(self, sender, content):
+		self.socket.send(Payload.register.value.to_bytes(1, 'big') + len(sender).to_bytes(2, 'big') + sender.encode('ascii') + len(content).to_bytes(2, 'big') + content.encode('ascii'))
 
-"""
-listens for 100 active connections. This number can be
-increased as per convenience.
-"""
-server.listen(100)
+#binary string as input, output a list (command type, arg 1, arg2)
+
+def encode(response, message):
+    return response.value.to_bytes(1, 'big') + len(message).to_bytes(2, 'big') + message.encode('ascii')
+
+def decode(buffer, socket):
+	match buffer[0]:
+		case Payload.register.value:
+			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
+			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
+			if username in accounts.keys():
+				socket.send(encode(Payload.error, "Username already registered."))
+				return
+			accounts[username] = Account(password)
+			socket.send(encode(Payload.success, f"Registered {username}."))
+
+		case Payload.login.value:
+			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
+			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
+			if username in accounts.keys():
+				if accounts[username].password == password:
+					accounts[username].socket = socket
+					socket.send(encode(Payload.success, f"Authenticated {username}."))
+					return
+				else:
+					socket.send(encode(Payload.error, f"Wrong password."))
+			socket.send(encode(Payload.error, f"Username not found."))
+
+		case Payload.deleteacc.value:
+			for account in accounts.keys():
+				if accounts[account].socket == socket:
+					del accounts[account]
+					socket.send(encode(Payload.success, f"Account deleted."))
+					return
+			socket.send(encode(Payload.error, f"Not authenticated."))
+
+		case Payload.accdump.value:
+			if accounts:
+				dump = "Users: "
+				for account in accounts:
+					dump += f"{account}, "
+				socket.send(encode(Payload.success, dump[:-2]+"."))
+				return
+			else:
+				socket.send(encode(Payload.error, "No accounts found."))
+				return
+
+		case Payload.accfilter.value:
+			wildcard = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii') #why extra processing?
+			if accounts:
+				r = re.compile(wildcard)
+				filtered_accs = list(filter(r.match, accounts)) #thanks https://stackoverflow.com/questions/3640359/regular-expressions-search-in-list
+				if not len(filtered_accs):
+					socket.send(encode(Payload.success, "No matching accounts."))
+				else:
+					dump = f"Matching Users: {', '.join(str(s) for s in filtered_accs)}." #thanks https://www.reddit.com/r/learnpython/comments/l10k8h/is_there_a_way_to_unpack_a_list_with_f_stings/ 
+					socket.send(encode(Payload.success, dump))
+				return
+			else:
+				socket.send(encode(Payload.error, "No accounts found."))
+				return
+
+		case Payload.message.value:
+			to = username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
+			content = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
+		case _:
+			print("[FAILURE] Incorrect command usage.")
+
 
 def clientthread(conn, addr, list_of_clients):
-
-	# sends a message to the client whose user object is conn
-	conn.send("Welcome to this chatroom!".encode('utf-8'))
-
+	suc(conn, "Welcome to this chatroom!")
 	while True:
 			try:
-				message = conn.recv(2048).decode('utf-8')
-
+				data = conn.recv(4096)
+				if not data: break
+				message = decode(data, conn)
 				if message:
 					print ("<" + addr[0] + "> " + message.strip())
 					message_to_send = "<" + addr[0] + "> " + message
 					broadcast(message_to_send, conn, list_of_clients)
 				else:
-					"""message may have no content if the connection
-					is broken, in this case we remove the connection"""
-					print("client conn broken")
 					remove(conn, list_of_clients)
-
 			except:
 				continue
 
-"""Using the below function, we broadcast the message to all
-clients who's object is not the same as the one sending
-the message """
 def broadcast(message, connection, list_of_clients):
 	for client in list_of_clients:
 		if client!=connection:
 			try:
-				client.send(message.encode('utf-8'))
+				nms(client, "testuser", message)
 			except:
 				client.close()
-				# if the link is broken, we remove the client
-				remove(client)
+				remove(client, list_of_clients)
 
-"""The following function simply removes the object
-from the list that was created at the beginning of
-the program"""
 def remove(connection, list_of_clients):
 	if connection in list_of_clients:
 		list_of_clients.remove(connection)
