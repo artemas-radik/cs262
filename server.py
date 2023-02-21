@@ -6,77 +6,62 @@ from enum import Enum
 
 accounts = {}
 
-class Payload(Enum):
-    register = 0
-    login = 1
-    deleteacc = 2
-    accdump = 3
-    accfilter = 4
-    message = 5
-    error = 6
-    success = 7
-    newmessage = 8
-
 class Account:
 	def __init__(self, password):
 		self.password = password
 
-	def message(self, sender, content):
-		self.socket.send(Payload.register.value.to_bytes(1, 'big') + len(sender).to_bytes(2, 'big') + sender.encode('ascii') + len(content).to_bytes(2, 'big') + content.encode('ascii'))
+def interpret(buffer, socket):
+	command = buffer.decode('utf-8').split(' ')
+	match command[0]:
 
-def encode(response, message):
-    return response.value.to_bytes(1, 'big') + len(message).to_bytes(2, 'big') + message.encode('ascii')
-
-def decode(buffer, socket):
-	match buffer[0]:
-		case Payload.register.value:
-			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
-			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
-			if username in accounts.keys():
-				socket.send(encode(Payload.error, "Username already registered."))
+		case 'register':
+			if command[1] in accounts.keys():
+				socket.send("Username already registered.".encode('utf-8'))
 				return
-			accounts[username] = Account(password)
-			socket.send(encode(Payload.success, f"Registered {username}."))
+			accounts[command[1]] = Account(command[2])
+			socket.send(f'Registered {command[1]}.'.encode('utf-8'))
 
-		case Payload.login.value:
-			username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
-			password = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
-			if username in accounts.keys():
-				if accounts[username].password == password:
-					accounts[username].socket = socket
-					socket.send(encode(Payload.success, f"Authenticated {username}."))
+		case 'login':
+			if command[1] in accounts.keys():
+				if accounts[command[1]].password == command[2]:
+					accounts[command[1]].socket = socket
+					socket.send(f'Authenticated {command[1]}.'.encode('utf-8'))
 					return
 				else:
-					socket.send(encode(Payload.error, f"Wrong password."))
-			socket.send(encode(Payload.error, f"Username not found."))
+					socket.send(f'Wrong password.'.encode('utf-8'))
+			socket.send(f'Username not found.'.encode('utf-8'))
 
-		case Payload.deleteacc.value:
+		case 'deleteacc':
 			for account in accounts.keys():
 				if accounts[account].socket == socket:
 					del accounts[account]
-					socket.send(encode(Payload.success, f"Account deleted."))
+					socket.send(f'Account deleted.')
 					return
-			socket.send(encode(Payload.error, f"Not authenticated."))
+			socket.send(f'Not authenticated.')
 
-		case Payload.accdump.value:
+		case 'accdump' | 'accfilter':
 			if accounts:
-				dump = "Users: "
+				dump = 'Users: '
 				for account in accounts:
-					dump += f"{account}, "
-				socket.send(encode(Payload.success, dump[:-2]+"."))
+					if command[0] == 'accdump' or command[1] in account:
+						dump += f'{account}, '
+				socket.send((dump[:-2]+'.').encode('utf-8'))
 				return
 			else:
-				socket.send(encode(Payload.error, "No accounts found."))
+				socket.send('No accounts found.')
 				return
 
-		case Payload.accfilter.value:
-			pass
+		case 'message':
+			try:
+				for username in accounts:
+					if accounts[username].socket == socket:
+						accounts[command[1]].socket.send(f'<{username}> {" ".join(command[2:])}'.encode('utf-8'))
+					socket.send('[FAILURE] Unauthenticated.'.encode('utf-8'))
+			except:
+				print("client offline!")
 
-		case Payload.message.value:
-			to = username = buffer[3:int.from_bytes(buffer[1:3],'big')+3].decode('ascii')
-			content = buffer[int.from_bytes(buffer[1:3],'big')+3:].decode('ascii')
 		case _:
-			print("[FAILURE] Incorrect command usage.")
+			socket.send('[FAILURE] Incorrect command usage.'.encode('utf-8'))
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -85,53 +70,16 @@ Port = int(sys.argv[2])
 server.bind((IP_address, Port))
 server.listen(100)
 
-list_of_clients = []
-
-def clientthread(conn, addr):
-	suc(conn, "Welcome to this chatroom!")
+def clientthread(conn):
 	while True:
-			try:
-				data = conn.recv(4096)
-				if not data: break
-				message = decode(data, conn)
-				if message:
-					print ("<" + addr[0] + "> " + message.strip())
-					message_to_send = "<" + addr[0] + "> " + message
-					broadcast(message_to_send, conn)
-				else:
-					remove(conn)
-			except:
-				continue
-
-def broadcast(message, connection):
-	for client in list_of_clients:
-		if client!=connection:
-			try:
-				nms(client, "testuser", message)
-			except:
-				client.close()
-				remove(client)
-
-def remove(connection):
-	if connection in list_of_clients:
-		list_of_clients.remove(connection)
-
-def err(client, message):
-	client.send(struct.pack('B256s', 6, message.encode('ascii')))
-
-def suc(client, message):
-	qwdee = (7).to_bytes(1, 'big') + len(message).to_bytes(2, 'big') + message.encode('ascii')
-	print(qwdee)
-	client.send(qwdee)
-
-def nms(client, from_username, content):
-	client.send(struct.pack('B16s512s', 8, from_username.strip().encode('ascii'), content.strip().encode('ascii')))
+		try:
+			data = conn.recv(4096)
+			if not data: break
+			interpret(data, conn)
+		except:
+			continue
 
 while True:
 	conn, addr = server.accept()
-	list_of_clients.append(conn)
 	print (addr[0] + " connected")
-	start_new_thread(clientthread,(conn,addr))	
-
-conn.close()
-server.close()
+	start_new_thread(clientthread,(conn,))

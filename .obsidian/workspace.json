@@ -31,8 +31,7 @@
               }
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -160,7 +159,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "afac31c781d6bd1d",
+  "active": "46fba294d99e63a5",
   "lastOpenFiles": [
     "readme.md"
   ]
