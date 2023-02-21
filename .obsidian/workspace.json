@@ -1,26 +1,14 @@
 {
   "main": {
-    "id": "f979cfd966f130a8",
+    "id": "474af878fc8d0def",
     "type": "split",
     "children": [
       {
-        "id": "6c6f236a9743e73c",
+        "id": "432cf3ed40c95c14",
         "type": "tabs",
         "children": [
           {
-            "id": "46fba294d99e63a5",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "readme.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "c11e2e3c8bed34b7",
+            "id": "8185282fbb37031e",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -37,15 +25,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "78e0844919a8dc26",
+    "id": "8a707e6e94e2d217",
     "type": "split",
     "children": [
       {
-        "id": "8750e9b88746b5ad",
+        "id": "21ec79e119af3c44",
         "type": "tabs",
         "children": [
           {
-            "id": "afac31c781d6bd1d",
+            "id": "235c16ebc0901153",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -55,7 +43,7 @@
             }
           },
           {
-            "id": "5df49a22d96b549c",
+            "id": "0374d741251f7ee5",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -70,7 +58,7 @@
             }
           },
           {
-            "id": "13e14902e8195fec",
+            "id": "cff9ede7b210b36a",
             "type": "leaf",
             "state": {
               "type": "starred",
@@ -81,19 +69,18 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
-    "id": "0f4a319444155603",
+    "id": "e5f64111152e6064",
     "type": "split",
     "children": [
       {
-        "id": "d1008d44842468ff",
+        "id": "212509ec92c15295",
         "type": "tabs",
         "children": [
           {
-            "id": "7459145c946d3e8c",
+            "id": "3a8c72ab1289d807",
             "type": "leaf",
             "state": {
               "type": "backlink",
@@ -110,7 +97,7 @@
             }
           },
           {
-            "id": "c78ffa333f5ba9c3",
+            "id": "25f96aeb1cdc47ae",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
@@ -122,7 +109,7 @@
             }
           },
           {
-            "id": "172d692a51e8c64b",
+            "id": "512cd71775f98415",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -133,7 +120,7 @@
             }
           },
           {
-            "id": "9fd3035034f054de",
+            "id": "9e19ec286e00937e",
             "type": "leaf",
             "state": {
               "type": "outline",
@@ -159,8 +146,6 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "46fba294d99e63a5",
-  "lastOpenFiles": [
-    "readme.md"
-  ]
+  "active": "8185282fbb37031e",
+  "lastOpenFiles": []
 }
