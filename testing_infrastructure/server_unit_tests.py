@@ -7,7 +7,7 @@ import unittest
 
 
 """Single Client + Server: Account Tests -- m1.txt"""
-"""
+
 #commands to run:
     #python3 server.py ip port
     #python3 server_unit_tests.py ip port
@@ -36,10 +36,10 @@ while l:
             l = f.readline().strip()
             server.send(l.encode('utf-8'))
         else:
-            pass"""
+            pass
 
 """Single Client + Server: Message Tests -- m2.txt"""
-
+"""
 #commands to run:
     #python3 server.py ip port
     #python3 server_unit_tests.py ip port
@@ -68,4 +68,4 @@ while l:
             l = f.readline().strip()
             server.send(l.encode('utf-8'))
         else:
-            pass
+            pass"""

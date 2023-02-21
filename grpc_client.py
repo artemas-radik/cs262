@@ -38,10 +38,10 @@ class Client:
                 response = self.stub.FilterUsers(users_pb2.filterUsers(wildcard=elements[1]))
             case "message":
                 if self.account[0] != -1:
-                    response = self.stub.MessageUser(users_pb2.messageUser(username=elements[1], from_user = self.account[0], m = elements[2]))
+                    response = self.stub.MessageUser(users_pb2.messageUser(username=elements[1], from_user = self.account[0], m = ' '.join(elements[2:])))
             case _:
                 print("[FAILURE] Incorrect command usage.")
-        print (response)
+        print(response.reply)
 
     def __listen_for_messages(self): #update conn input here
         """

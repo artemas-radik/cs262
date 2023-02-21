@@ -98,6 +98,8 @@ To uphold these principles, we:
 
 ### Testing Infrastructure
 
+>**split into 5 files, have one master file run the 5 tests**
+
 We build unit tests following the principles outlined by [Nathan Peck](https://medium.com/@nathankpeck/microservice-testing-unit-tests-d795194fe14e), via Medium. The goal of unit testing is to isolate/test specific functionality in a single network component. We implement unit testing in server_unit_tests.py. The first test suite is for account management functionality. We compare expected results against generated results, for a manually designed set of commands. The second test suite is for simple message functionality (processing & error handling), again via a manually designed set of commands. 
 
 We implement integrated testing in integrated_testing.py. The first test suite is for robustness against redundant or illogical commands. Runs a set of randomly generated commands from a single client. The second test suite is manually designed integrated testing, for all functionality over multiple clients. This is where most of the rigorous edge case testing takes place. The third test suite is once again for robustness, over a set of randomly generated commands, this time with multiple clients. 

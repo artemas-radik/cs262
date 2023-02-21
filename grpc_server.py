@@ -13,7 +13,6 @@ accounts = {}
 
 """
 Soft TODO:
-load message history for dropped client
 restrict to single login / server and/or single server / account
 """
 
@@ -33,7 +32,8 @@ class UserTable(users_pb2_grpc.UserTableServicer):
     def LoginUser(self, request, context):
         if request.username in accounts.keys():
             if accounts[request.username] == request.password:
-                return users_pb2.requestReply(reply= f"Authenticated {request.username}.")
+                dump = '\n'.join([c.m for c in self.chats if c.username==request.username])
+                return users_pb2.requestReply(reply= f"Authenticated {request.username}. \n{dump}")
             else: 
                 return users_pb2.requestReply(reply= f"Wrong password.")
         else:
