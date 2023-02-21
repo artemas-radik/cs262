@@ -28,13 +28,13 @@ We use Python's `Lib/struct.py` to encode/decode messages efficiently and safely
 
 ### Format Strings
 
-> Format strings are the mechanism used to specify the expected layout when packing and unpacking data. They are built up from [Format Characters](https://docs.python.org/3.7/library/struct.html#format-characters), which specify the type of data being packed/unpacked.
+> Format strings are the mechanism used to specify the expected layout when packing and unpacking data. They are built up from [Format Characters](https://docs.python.org/3.7/library/struct.html#format-characters), which specify the type of data being packed/unpacked.
 
 **Note that all strings in this project are `ascii` encoded.** Thus, a string's size is equivalent to its length in all cases, as one `ascii` character takes one byte to store. Checks are in place client side to prevent usage of non-`ascii` strings.
 
 ### Transfer Buffer
 
-The transfer buffer defines the structure of any and all messages exchanged between the client and server. We define the transfer buffer in this project as the union of a *Message Code* and a *Payload*. The first byte of any exchanged message is the *Message Code*, and the remaining bytes are the *Payload*. The *Message Code* has a Format Character of `B`, which maps to a C `unsigned char`. Each *Message Code* maps to a *Message Type*, which is an internal identifier introduced for accessibility and readibilty purposes. For instance, the client program labels its commands via the associated *Message Type* that they broadcast. Message codes `0...5` are requests made by a client to the server, and message codes `6...8` are responses made by the server to a client. Each message code is described in detail below. The *Payload Parameters* are combined sequentially in-order to form the *Payload*.
+The transfer buffer defines the structure of any and all messages exchanged between the client and server. We define the transfer buffer in this project as the union of a *Message Code* and a *Payload*. The first byte of any exchanged message is the *Message Code*, and the remaining bytes are the *Payload*. The *Message Code* has a Format Character of `B`, which maps to a C `unsigned char`. Each *Message Code* maps to a *Message Type*, which is an internal identifier introduced for accessibility and readibilty purposes. For instance, the client program labels its commands via the associated *Message Type* that they broadcast. Message codes `0...5` are requests made by a client to the server, and message codes `6...8` are responses made by the server to a client. Each message code is described in detail below. The *Payload Parameters* are combined sequentially in-order to form the *Payload*.
 
 ##### Requests 
 
@@ -55,46 +55,3 @@ Message Code: Type | Description | Payload Parameters
 7: `suc` | Success message. | message:`256s`
 8: `nms` | New chat message. | from_username:`16s`, content:`512s`
 
-
-##### Testing Framework
-
-General notes:
-- justify the message codes we implemented (inclusion, exclusion of certain functionality)
-- 
-
-
-Spec:
-server should never crash
-- when server terminates, clients should terminate
-client should never infinite loop
-client should never return a result != truth on server
-
-
-https://www.quora.com/How-do-I-test-a-distributed-system
-Concurrency bugs
-Inadequate failure handling
-Incorrect input validation (usually leading to security bugs) or flawed threat models
-
-
-https://web.stanford.edu/~engler/osdi2002.pdf
-- not model checker
-
-
-https://www.cs.cmu.edu/~aldrich/courses/17-355-18sp/notes/notes14-symbolic-execution.pdf
-- symbolic execution isn't really testing our potential fail points
-
-
-https://docs.python.org/3/library/unittest.html
-- library providing testing framework
-
-Server design:
-- We want our server to be deterministic.
-
-Testing design:
-- repeatability
-
-Command to generate gRPC code from users.proto
-python3 -m grpc_tools.protoc -I./ --python_out=. --pyi_out=. --grpc_python_out=. ./users.proto
-
-Reference this post: https://groups.google.com/g/grpc-io/c/iLHgWC8o8UM/m/2PN4WaA9anMJ
-- lazy auth
