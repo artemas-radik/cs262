@@ -1,4 +1,10 @@
 
+## TODOS:
+- implement client identification on gRPC, to fix deletion and messaging
+- decide how we're packaging this for demo day
+- comment the code
+- (smaller todos are listed throughout this document. but truly, we could just ignore them. depends on how much time we have)
+
 # Getting Started
 *Tested on MacOS Ventura 13.2 with Python 3.9.6 Installed*
 
@@ -92,12 +98,11 @@ To uphold these principles, we:
 
 ### Testing Infrastructure
 
-We build unit tests with [UnitTest](https://docs.python.org/3/library/unittest.html), a python library providing a nice testing framework. 
+We build unit tests following the principles outlined by [Nathan Peck](https://medium.com/@nathankpeck/microservice-testing-unit-tests-d795194fe14e), via Medium. The goal of unit testing is to isolate/test specific functionality in a single network component. We implement unit testing in server_unit_tests.py. The first test suite is for account management functionality. We compare expected results against generated results, for a manually designed set of commands. The second test suite is for simple message functionality (processing & error handling), again via a manually designed set of commands. 
 
-> **Swati: separate tests into files, describe tests here, discuss results below**
+We implement integrated testing in integrated_testing.py. The first test suite is for robustness against redundant or illogical commands. Runs a set of randomly generated commands from a single client. The second test suite is manually designed integrated testing, for all functionality over multiple clients. This is where most of the rigorous edge case testing takes place. The third test suite is once again for robustness, over a set of randomly generated commands, this time with multiple clients. 
 
-Server design: We want our server to be deterministic.
-Testing design: repeatability
+A couple design goals we kept in mind: we want our server to be deterministic, and our testing to be repeatable. Background research which was especially helpful in informing our infrastructure decisions: [Don't Write Tests](https://www.youtube.com/watch?v=hXnS_Xjwk2Y), and [Testing a Distributed System](https://queue.acm.org/detail.cfm?id=2800697).
 
 ### Issues
 
@@ -108,7 +113,7 @@ Testing revealed the following issues:
 4. Messages dropped if account logs off, logs back on
 5. Error statements for failed message delivery do not accurately descibe the error
 
-> **Arty: pls weigh in on my message queue**
+> **Arty: feel free to weigh in on/change my message queue**
 
 > **Open Issue: Client does not disconnect when Server crashes.****
 
@@ -132,10 +137,31 @@ python3 -m grpc_tools.protoc -I./ --python_out=. --pyi_out=. --grpc_python_out=.
 Reference this post: https://groups.google.com/g/grpc-io/c/iLHgWC8o8UM/m/2PN4WaA9anMJ
 - lazy authentication (client manually adds a password)
 
+**Swati's crackhead 5am notes:**
+should store on server whether someone has already logged in?
+    that's kind of horrible though...
+ok, so you literally cannot login again to an account
+    you can only delete your own account (your account is stored client side)
+accdump, accfilter unchanged
+message
+I'm just going to mimic my wire protocol functionality exactly with gRPC, then discuss why gRPC lends itself poorly to certain things (ex login, authentication)
+    should also discuss what, if anything, gRPC lends itself well to: file:///Users/swatigoel/Downloads/p39-birrell.pdf
+also note: I guess I've made password functionality on wire protocol, and here, obsolete, but it was easier this way
+    or not entirely, because client might re log in!!
+transmute payload success or payload error functionality!!
+
 #### *February 20th, 2023*
 
 ### Results
 
+> **Swati: add something regarding test cases which still fail (login from m1, for example).**
+
+> **Arty: if you have time to implement any sort of efficiency testing, amazing**
+
+
 ### Discussion
 
-> **One of Swati/Arty: Write a para comparing wire protocol and gRPC. **
+> **One of Swati/Arty: Write a para comparing efficiency of wire protocol and gRPC. Pref Arty.** 
+
+> **Sub question: constrain size of command arguments? how in wire protocol vs grpc**
+

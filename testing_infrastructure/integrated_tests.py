@@ -40,42 +40,9 @@ def randomized_commands(n, m, fname):
     with open(fname, 'w') as fp: #thanks https://pynative.com/python-write-list-to-file/
         for comm in lst:
             fp.write("%s\n" % comm)
-
-"""Single Client + Server: Manual Test -- m1.txt"""
-"""
-#commands to run:
-    #python3 server.py ip 5000
-    #python3 integrated_tests.py ip 5000
-#note: must restart server upon each run
-#note: need to update m1_output.txt
-
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ip = str(sys.argv[1])
-port = int(sys.argv[2])
-server.connect((ip, port))
-
-f = open('../test_cases/m1.txt', 'r')
-f_out = open('../test_cases/m1_output.txt', 'r')
-
-l = output = 1
-
-while l:
-    sockets_list = [sys.stdin, server]
-    
-    read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
-
-    for socks in read_sockets:
-        if socks == server:
-            m = socks.recv(4096).decode('utf-8')
-            print(m, m == output)
-            output = f_out.readline().strip()
-            l = f.readline().strip()
-            server.send(l.encode('utf-8')) #currently breaks on bad delete command
-        else:
-            pass"""
             
 
-"""Single Client + Server: Automated Test"""
+"""Single Client + Server: Automated Test -- commands_lst.txt"""
 
 """
 #commands to run:
@@ -106,17 +73,60 @@ while i < len(commands_list):
         if socks == server:
             m = socks.recv(4096).decode('utf-8')
             print(m)
-            #output = ?? #currently just checks client/server comm framework, in future should check correctness of state as well
+            #output = #just checking robustness, not server state!
             server.send(commands_list[i].encode('utf-8'))
             i += 1
         else:
             pass"""
 
-"""Multiple Clients + Server: Manual Test"""
 
+"""Multiple Clients + Server: Manual Test -- m3.txt"""
 #commands to run:
-    #python3 server.py ip 5000
-    #python3 integrated_tests.py ip 5000 (starts two clients)
+    #python3 server.py ip port
+    #python3 integrated_tests.py ip port (starts two clients)
+#note: must restart server upon each run
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+ip = str(sys.argv[1])
+port = int(sys.argv[2])
+server.connect((ip, port))
+
+server_conn2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_conn2.connect((ip, port))
+
+f = open('../test_cases/m3.txt', 'r')
+f_out = open('../test_cases/m3_output.txt', 'r')
+
+l = output = 1
+i = 0
+
+while l:
+    sockets_list = [sys.stdin, server, server_conn2]
+    read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
+
+    for socks in read_sockets:
+        if socks == server or socks == server_conn2:
+            m = socks.recv(4096).decode('utf-8').replace('\n', ' ')
+            print(m == output)
+            if (i == 0): 
+                i += 1
+                continue
+            l = f.readline().strip()
+            output = f_out.readline().strip()
+            if (i % 2 == 0):
+                server.send(l.encode('utf-8'))
+            else:
+                server_conn2.send(l.encode('utf-8'))
+            i += 1
+        else:
+            pass
+
+
+"""Multiple Clients + Server: Automated Test -- commands_lst.txt"""
+"""
+#commands to run:
+    #python3 server.py ip port
+    #python3 integrated_tests.py ip port (starts two clients)
 #note: must restart server upon each run
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -142,11 +152,11 @@ while i < len(commands_list):
     for socks in read_sockets:
         if socks == server or socks == server_conn2:
             m = socks.recv(4096).decode('utf-8')
-            print(m) #checking for the client breaking, currently implementing checks that server is in correct state
+            print(m) #checks for obvious breaks
             if (i % 2 == 0):
                 server.send(commands_list[i].encode('utf-8'))
             else:
                 server_conn2.send(commands_list[i].encode('utf-8'))
             i += 1
         else:
-            pass
+            pass"""

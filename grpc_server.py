@@ -10,8 +10,11 @@ import users_pb2
 import users_pb2_grpc
 
 accounts = {}
-    
-#transmute payload success or payload error functionality!!
+
+"""
+TODO:
+fix delete/messaging on gRPC (estimated time = 90 minutes)
+"""
 
 class UserTable(users_pb2_grpc.UserTableServicer):
     #return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
@@ -69,7 +72,7 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         if request.username not in accounts:
             return users_pb2.requestReply("User dne.")
         """try:
-            #HOW TO IMPLEMENT IF WE DON'T HAVE A WAY OF IDENTIFYING CLIENT?
+            #NEED TO IMPLEMENT METHOD BY WHICH SERVER CAN IDENTIFY CLIENT
         try:
             for username in accounts:
                 if accounts[username].socket == socket:

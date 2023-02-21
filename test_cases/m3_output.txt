@@ -1,0 +1,17 @@
+Registered lucy.
+Registered sally.
+Authenticated lucy.
+Registered rando.
+User dne.
+Users: lucy, sally, rando.
+Client offline!
+Max devices which can login at once: 1.
+Client offline!
+Authenticated sally. <lucy> hello <lucy> helllooooooo        
+Registered harry.
+Users: lucy, sally, rando, harry.
+Ma'am, you are already logged in.
+Account deleted.
+Account deleted.
+Not authenticated.
+Users: rando, harry.

@@ -1,0 +1,7 @@
+Registered ellen.
+Registered lev.
+Kindly log in.
+Authenticated ellen.
+<ellen> hello!
+Client offline!
+User dne.

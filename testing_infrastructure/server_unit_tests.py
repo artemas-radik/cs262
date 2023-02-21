@@ -39,6 +39,7 @@ while l:
             pass"""
 
 """Single Client + Server: Message Tests -- m2.txt"""
+
 #commands to run:
     #python3 server.py ip port
     #python3 server_unit_tests.py ip port
@@ -68,6 +69,3 @@ while l:
             server.send(l.encode('utf-8'))
         else:
             pass
-
-
-"""Single Client + Server: Random Tests -- commands_lst.txt """

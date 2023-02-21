@@ -1,0 +1,17 @@
+register lucy diamonds
+register sally walker
+login lucy diamonds
+register rando 2
+message harry hi
+accdump
+message sally hello
+login lucy diamonds
+message sally helllooooooo
+login sally walker
+register harry styles
+accdump
+login harry styles
+deleteacc
+deleteacc
+deleteacc
+accdump
