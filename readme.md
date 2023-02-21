@@ -55,3 +55,6 @@ Message Code: Type | Description | Payload Parameters
 7: `suc` | Success message. | message:`256s`
 8: `nms` | New chat message. | from_username:`16s`, content:`512s`
 
+##### Feb 20
+
+*Issue: Server allows multiple logins from same client, but freaks tf out when deleteacc is subsequently called.*

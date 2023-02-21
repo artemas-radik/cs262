@@ -20,6 +20,7 @@ def interpret(buffer, socket):
 				return
 			accounts[command[1]] = Account(command[2])
 			socket.send(f'Registered {command[1]}.'.encode('utf-8'))
+			return
 
 		case 'login':
 			if command[1] in accounts.keys():
@@ -66,13 +67,8 @@ def interpret(buffer, socket):
 
 		case _:
 			socket.send('[FAILURE] Incorrect command usage.'.encode('utf-8'))
-
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-IP_address = str(sys.argv[1])
-Port = int(sys.argv[2])
-server.bind((IP_address, Port))
-server.listen(100)
+			return
+	#socket.send('[FAILURE] Incorrect command usage.'.encode('utf-8'))
 
 def clientthread(conn):
 	while True:
@@ -85,9 +81,18 @@ def clientthread(conn):
 				break
 			interpret(data, conn)
 		except:
+			conn.send('[FAILURE]'.encode('utf-8'))
 			continue
 
-while True:
-	conn, addr = server.accept()
-	print (addr[0] + " connected")
-	start_new_thread(clientthread,(conn,))
+if __name__ == "__main__":
+	server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	IP_address = str(sys.argv[1])
+	Port = int(sys.argv[2])
+	server.bind((IP_address, Port))
+	server.listen(100)
+
+	while True:
+		conn, addr = server.accept()
+		print (addr[0] + " connected")
+		start_new_thread(clientthread,(conn,))
