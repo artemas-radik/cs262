@@ -81,7 +81,7 @@ def clientthread(conn):
 				break
 			interpret(data, conn)
 		except:
-			conn.send('[FAILURE]'.encode('utf-8'))
+			#conn.send('[FAILURE]'.encode('utf-8'))
 			continue
 
 if __name__ == "__main__":
@@ -95,4 +95,5 @@ if __name__ == "__main__":
 	while True:
 		conn, addr = server.accept()
 		print (addr[0] + " connected")
+		conn.send('Connected!'.encode('utf-8'))
 		start_new_thread(clientthread,(conn,))
