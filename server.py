@@ -53,10 +53,14 @@ def interpret(buffer, socket):
 
 		case 'message':
 			try:
-				for username in accounts:
-					if accounts[username].socket == socket:
-						accounts[command[1]].socket.send(f'<{username}> {" ".join(command[2:])}'.encode('utf-8'))
-					socket.send('[FAILURE] Unauthenticated.'.encode('utf-8'))
+				if accounts[command[1]].socket:
+					for username in accounts:
+						if accounts[username].socket == socket:
+							accounts[command[1]].socket.send(f'<{username}> {" ".join(command[2:])}'.encode('utf-8'))
+							break
+				else:
+					print('this socket is dead!')
+					# todo add messages to a queue here and deliver upon socket re-attachment
 			except:
 				print("client offline!")
 
@@ -74,7 +78,11 @@ def clientthread(conn):
 	while True:
 		try:
 			data = conn.recv(4096)
-			if not data: break
+			if not data: 
+				for username in accounts:
+					if accounts[username].socket == conn:
+						accounts[username].socket = None
+				break
 			interpret(data, conn)
 		except:
 			continue
