@@ -1,6 +1,6 @@
 
 ## TODOS:
-- implement client identification on gRPC, to fix deletion and messaging
+- implement client identification on gRPC, to fix deletion and messaging -- NOW DONE!!!
 - decide how we're packaging this for demo day
 - comment the code
 - (smaller todos are listed throughout this document. but truly, we could just ignore them. depends on how much time we have)
@@ -150,6 +150,7 @@ also note: I guess I've made password functionality on wire protocol, and here, 
     or not entirely, because client might re log in!!
 transmute payload success or payload error functionality!!
 chat functionality via: https://melledijkstra.github.io/science/chatting-with-grpc-in-python
+delete: reasoning: if a client can login to an account (ie has access to an account password), they can delete that account. else, cannot
 
 #### *February 20th, 2023*
 

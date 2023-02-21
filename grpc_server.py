@@ -12,12 +12,17 @@ import users_pb2_grpc
 accounts = {}
 
 """
-TODO:
-fix messaging on gRPC
+Soft TODO:
+load message history for dropped client
+restrict to single login / server and/or single server / account
 """
 
 class UserTable(users_pb2_grpc.UserTableServicer):
     #return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
+
+    def __init__(self):
+        # List with all the chat history
+        self.chats = []
 
     def RegisterUser(self, request, context):
         if request.username in accounts.keys():
@@ -67,19 +72,22 @@ class UserTable(users_pb2_grpc.UserTableServicer):
             return users_pb2.requestReply(reply= f"No accounts found.")
     
     def MessageUser(self, request, context):
-        logged_in = False
-        uname = "Guest"
+        #logged_in = False
+        #uname = "Guest"
         if request.username not in accounts:
-            return users_pb2.requestReply("User dne.")
-        """try:
-            #NEED TO IMPLEMENT METHOD BY WHICH SERVER CAN IDENTIFY CLIENT
-        try:
-            for username in accounts:
-                if accounts[username].socket == socket:
-                    logged_in = True
-                    uname = username
-                    accounts[command[1]].socket.send(f'<{username}> {" ".join(command[2:])}'.encode('utf-8'))
-                    return"""
+            return users_pb2.requestReply("User dne.") 
+        self.chats.append(request)
+        return users_pb2.requestReply()
+    
+    def SubscribeMessages(self, request_iterator, context):
+        lastindex = 0
+        # For every client a infinite loop starts (in gRPC's own managed thread)
+        while True:
+            # Check if there are any new messages
+            while len(self.chats) > lastindex:
+                s = self.chats[lastindex]
+                lastindex += 1
+                yield s
 
 def serve(port):
     #port = '50051'

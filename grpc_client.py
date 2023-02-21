@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import logging
 import sys
+import threading
 
 import grpc
 import users_pb2
@@ -11,51 +12,52 @@ import users_pb2_grpc
 
 class Client:
 
-    def __init__(self):
-        account = (-1, -1)
-        #threading.Thread(target=self.__listen_for_messages, daemon=True).start()
+    def __init__(self, server_addy):
+        self.account = (-1, -1)
+        self.channel = grpc.insecure_channel(server_addy)
+        self.stub = users_pb2_grpc.UserTableStub(self.channel)
+        self.chat_list = []
+        threading.Thread(target=self.__listen_for_messages, daemon=True).start()
 
     def run(self, server_addy, comm):
         elements = comm.split(' ')
-        with grpc.insecure_channel(server_addy) as channel:
-            stub = users_pb2_grpc.UserTableStub(channel) #is this conn?
 
-            response = "no response"
-            match elements[0]:
-                case "register": #HOW TO CONSTRICT SIZE OF STRING
-                    response = stub.RegisterUser(users_pb2.registerUser(username=elements[1], password=elements[2]))
-                    print(response.reply)
-                case "login":
-                    self.account = elements[1], elements[2]
-                    response = stub.LoginUser(users_pb2.loginUser(username=elements[1], password=elements[2]))
-                case "deleteacc":
-                    response = stub.DeleteUser(users_pb2.deleteUser(username=elements[1], from_user = self.account[0], password=self.account[1]))
-                        #reasoning: if a client can login to an account (ie has access to an account password), they can delete that account. else, cannot
-                case "accdump":
-                    response = stub.DumpUsers(users_pb2.dumpUsers())
-                case "accfilter":
-                    response = stub.FilterUsers(users_pb2.filterUsers(wildcard=elements[1]))
-                case "message":
-                    response = stub.MessageUser(users_pb2.messageUser(username=elements[1], from_user = account[1], m = elements[2]))
-                case _:
-                    print("[FAILURE] Incorrect command usage.")
-            print (response)
+        response = "somewhere, someone, something fucked up"
+        match elements[0]:
+            case "register": #HOW TO CONSTRICT SIZE OF STRING
+                response = self.stub.RegisterUser(users_pb2.registerUser(username=elements[1], password=elements[2]))
+                #print(response.reply)
+            case "login":
+                self.account = elements[1], elements[2]
+                response = self.stub.LoginUser(users_pb2.loginUser(username=elements[1], password=elements[2]))
+            case "deleteacc":
+                response = self.stub.DeleteUser(users_pb2.deleteUser(username=elements[1], from_user = self.account[0], password=self.account[1]))
+            case "accdump":
+                response = self.stub.DumpUsers(users_pb2.dumpUsers())
+            case "accfilter":
+                response = self.stub.FilterUsers(users_pb2.filterUsers(wildcard=elements[1]))
+            case "message":
+                if self.account[0] != -1:
+                    response = self.stub.MessageUser(users_pb2.messageUser(username=elements[1], from_user = self.account[0], m = elements[2]))
+            case _:
+                print("[FAILURE] Incorrect command usage.")
+        print (response)
 
     def __listen_for_messages(self): #update conn input here
         """
         This method will be ran in a separate thread as the main/ui thread, because the for-in call is blocking
         when waiting for new messages
         """
-        for note in self.conn.ChatStream(chat.Empty()):  # this line will wait for new messages from the server!
-            print("R[{}] {}".format(note.name, note.message))  # debugging statement
-            self.chat_list.insert(END, "[{}] {}\n".format(note.name, note.message))  # add the message to the UI
+        for note in self.stub.SubscribeMessages(users_pb2.requestReply()):  # this line will wait for new messages from the server!
+            if (note.username == self.account[0]):
+                print("<{}> {}".format(note.from_user, note.m))
 
 
 if __name__ == '__main__':
     logging.basicConfig()
     ip = str(sys.argv[1]) #asssume ip = 'Localhost' for now
     port = int(sys.argv[2])
-    client_start = Client()
+    client_start = Client(f'{ip}:{port}')
 
     while True:
         comm = input()
