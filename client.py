@@ -9,6 +9,9 @@ if __name__ == "__main__":
         read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
         for socks in read_sockets:
             if socks == server:
-                message = print(socks.recv(4096).decode("utf-8"))
+                m = socks.recv(4096).decode("utf-8")
+                if (m == ''): #CHANGE THIS SOLUTION/TEST FAIL POINTS
+                    break
+                message = print(m)
             else:
                 server.send(sys.stdin.readline().strip().encode('utf-8'))

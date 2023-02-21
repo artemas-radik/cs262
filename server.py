@@ -9,6 +9,8 @@ accounts = {}
 class Account:
 	def __init__(self, password):
 		self.password = password
+		self.message_queue = []
+	
 
 def interpret(buffer, socket):
 	command = buffer.decode('utf-8').split(' ')
@@ -23,10 +25,24 @@ def interpret(buffer, socket):
 			return
 
 		case 'login':
+			for u in accounts.keys():
+				try:
+					if accounts[u].socket == socket:
+						socket.send("Ma'am, you are already logged in.".encode('utf-8'))
+						return
+				except:
+					pass
 			if command[1] in accounts.keys():
 				if accounts[command[1]].password == command[2]:
+					try:
+						if accounts[command[1]].socket:
+							socket.send("Max devices which can login at once: 1.".encode('utf-8'))
+							return
+					except:
+						pass
 					accounts[command[1]].socket = socket
-					socket.send(f'Authenticated {command[1]}.'.encode('utf-8'))
+					socket.send('\n'.join([f'Authenticated {command[1]}.'] + accounts[command[1]].message_queue).encode('utf-8'))
+					accounts[command[1]].message_queue = []
 					return
 				else:
 					socket.send(f'Wrong password.'.encode('utf-8'))
@@ -34,11 +50,14 @@ def interpret(buffer, socket):
 
 		case 'deleteacc':
 			for account in accounts.keys():
-				if accounts[account].socket == socket:
-					del accounts[account]
-					socket.send(f'Account deleted.')
-					return
-			socket.send(f'Not authenticated.')
+				try:
+					if accounts[account].socket == socket:
+						del accounts[account]
+						socket.send(f'Account deleted.'.encode('utf-8'))
+						return
+				except:
+					pass
+			socket.send(f'Not authenticated.'.encode('utf-8'))
 
 		case 'accdump' | 'accfilter':
 			if accounts:
@@ -53,17 +72,24 @@ def interpret(buffer, socket):
 				return
 
 		case 'message':
+			logged_in = False
+			uname = "Guest"
+			if command[1] not in accounts:
+				socket.send("User dne.".encode('utf-8'))
+				return
 			try:
-				if accounts[command[1]].socket:
-					for username in accounts:
-						if accounts[username].socket == socket:
-							accounts[command[1]].socket.send(f'<{username}> {" ".join(command[2:])}'.encode('utf-8'))
-							break
-				else:
-					print('this socket is dead!')
-					# todo add messages to a queue here and deliver upon socket re-attachment
+				for username in accounts:
+					if accounts[username].socket == socket:
+						logged_in = True
+						uname = username
+						accounts[command[1]].socket.send(f'<{username}> {" ".join(command[2:])}'.encode('utf-8'))
+						return
 			except:
-				print("client offline!")
+				if (not logged_in):
+					socket.send("Kindly log in.".encode('utf-8'))
+					return
+				socket.send("Client offline!".encode('utf-8'))
+				accounts[command[1]].message_queue.append(f'<{uname}> {" ".join(command[2:])}')
 
 		case _:
 			socket.send('[FAILURE] Incorrect command usage.'.encode('utf-8'))
