@@ -1,0 +1,19 @@
+[SUCCESS] Registered arty.
+[SUCCESS] Registered arty2.
+[SUCCESS] Registered arty3.
+[WARNING] Username already registered.
+[WARNING] Wrong password.
+[SUCCESS] Authenticated arty.
+[SUCCESS] Users: arty, arty2, arty3.
+[SUCCESS] Account deleted.
+
+[SUCCESS] Users: arty2, arty3.
+
+[SUCCESS] Matching Users: arty2.
+[SUCCESS] No matching accounts.
+[SUCCESS] Authenticated arty2.
+[SUCCESS] Authenticated arty3.
+
+[SUCCESS] Users: arty3.
+
+[SUCCESS] No Matching accounts.
