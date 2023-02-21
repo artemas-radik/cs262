@@ -50,6 +50,7 @@ We use Python's `Lib/struct.py` to encode/decode messages efficiently and safely
 The transfer buffer defines the structure of any and all messages exchanged between the client and server. We define the transfer buffer in this project as the union of a *Message Code* and a *Payload*. The first byte of any exchanged message is the *Message Code*, and the remaining bytes are the *Payload*. The *Message Code* has a Format Character of `B`, which maps to a C `unsigned char`. Each *Message Code* maps to a *Message Type*, which is an internal identifier introduced for accessibility and readibilty purposes. For instance, the client program labels its commands via the associated *Message Type* that they broadcast. Message codes `0...5` are requests made by a client to the server, and message codes `6...8` are responses made by the server to a client. Each message code is described in detail below. The *Payload Parameters* are combined sequentially in-order to form the *Payload*.
 
 > **Arty: pls make edits to the wire protocol section as appropriate.** 
+
 > **Arty: do we need to justify inclusion/exclusion of any message codes/functionality?**
 
 ##### Requests 
@@ -73,7 +74,7 @@ Message Code: Type | Description | Payload Parameters
 
 #### *February 17th, 2023*
 
-### Test Infrastructure
+### Design Spec
 
 Design principles:
 1. Robustness against user: the server should not crash as the result of a client command. 
@@ -89,79 +90,47 @@ To uphold these principles, we:
 3. Queue messages to offline accounts.
 	1. Note: we do not require confirmation of message receipt.
 
+### Testing Infrastructure
+
+We build unit tests with [UnitTest](https://docs.python.org/3/library/unittest.html), a python library providing a nice testing framework.
+
+Server design: We want our server to be deterministic.
+Testing design: repeatability
+
 ### Issues
 
-*Issue: Server allows multiple logins to different accounts from same client, but freaks tf out when deleteacc is subsequently called.*
-*Issue: A second client login to same account --> forced logout of first client*
-*Issue: deleteacc confirmation not sending*
-*Issue: Messages do not queue when client is temporarily logged off* **Artemas, please weigh in if I dealt with this suboptimally**
-*Issue: Error statements for failed message deliver do not accurately describe the failure*
+Testing revealed the following issues:
+1. Server allows multiple logins per client, returns a blank stare on deleteacc
+2. Multiple clients can log into the same account, but second client login forces first client logout
+3. No confirmation message sent on successful deleteacc
+4. Messages dropped if account logs off, logs back on
+5. Error statements for failed message delivery do not accurately descibe the error
 
-**Still open: *Issue: Client does not disconnect when Server crashes.**
+> **Arty: pls weigh in on my message queue**
+
+> **Open Issue: Client does not disconnect when Server crashes.****
+
+*We address Issue 1 by disallowing multiple accounts per client. We address Issue 2 by disallowing multiple clients per account.*
+
+*Issue 3 was an encoding error. Have fixed with .encode('utf-8')*
+
+*Issues 4 and 5 fixed via implementation of a message queue, and more rigorous error handling.*
 
 #### *February 19th, 2023*
 
 ### RPC
 
-#### *February 20th, 2023*
-
-### Results
-
-
-##### Testing Framework
-
-  
-  
-
-https://www.quora.com/How-do-I-test-a-distributed-system
-
-Concurrency bugs
-
-Inadequate failure handling
-
-Incorrect input validation (usually leading to security bugs) or flawed threat models
-
-  
-  
-
-https://web.stanford.edu/~engler/osdi2002.pdf
-
-- not model checker
-
-  
-  
-
-https://www.cs.cmu.edu/~aldrich/courses/17-355-18sp/notes/notes14-symbolic-execution.pdf
-
-- symbolic execution isn't really testing our potential fail points
-
-  
-  
-
-https://docs.python.org/3/library/unittest.html
-
-- library providing testing framework
-
-  
-
-Server design:
-
-- We want our server to be deterministic.
-
-  
-
-Testing design:
-
-- repeatability
-
-  
-
 Command to generate gRPC code from users.proto
 
 python3 -m grpc_tools.protoc -I./ --python_out=. --pyi_out=. --grpc_python_out=. ./users.proto
 
-  
-
 Reference this post: https://groups.google.com/g/grpc-io/c/iLHgWC8o8UM/m/2PN4WaA9anMJ
+lazy auth
 
-- lazy auth
+#### *February 20th, 2023*
+
+### Results
+
+### Discussion
+
+> **One of Swati/Arty: Write a para comparing wire protocol and gRPC. **
