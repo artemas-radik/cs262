@@ -1,0 +1,7 @@
+register ellen fitz
+register lev krug
+message ellen hello!
+login ellen fitz
+message ellen hello!
+message lev hi!
+message sally hey there!

@@ -1,3 +1,10 @@
+
+## TODOS:
+- implement client identification on gRPC, to fix deletion and messaging -- NOW DONE!!!
+- decide how we're packaging this for demo day
+- comment the code
+- (smaller todos are listed throughout this document. but truly, we could just ignore them. depends on how much time we have)
+
 # Getting Started
 *Tested on MacOS Ventura 13.2 with Python 3.9.6 Installed*
 
@@ -8,19 +15,31 @@ Replace cases of `10.250.243.199` with your private IP address, obtained by runn
 python3 server.py 10.250.243.199 5000
 ```
 
-### Client
+## Client
 ```bash
 python3 client.py 10.250.243.199 5000
 ```
 
+> **One of Swati/Arty: decide/set up demo day. Write demo day guide. Pref Arty.** 
+
+> **Sub issue: link w adarsh/andrew (or karly, or kayla, or kat) to exchange code, prior to demo day?**
+ 
+> **One of Swati/Arty: check assignment spec against current engineering notebook & code.**
+
+> **Swati: comment the code, in a reasonable timeframe so Arty can iterate, if desired.**
+
 # Engineering Notebook
 #### *February 7th, 2023*
 We started the project today by following a guide for a similar project available [here](https://www.geeksforgeeks.org/simple-chat-room-using-python/) . Our goal for the moment is to acheive what the guide claims to acheive: a simple client-server chat program, where simple text messages can be sent to the server by clients and then rebroadcasted to every other client. Unfortunately the code provided by the guide does not work out-of-the-box and has the following issues:
-1. Clients enter infinite loop state after server terminates. Server enters infinite loop state after client terminates.
+1. Clients enter infinite loop state after server terminates.
 2. Bytes not properly encoded/decoded to `utf-8` on both client and server side.
 3. Multiple clients from the same IP address not served properly (dropped messages).
 
-*We address Issue 1A by checking for the "server terminated" message (0 or an empty string) every time the client receives a message. Per advice [here](https://stackoverflow.com/questions/19795529/python-troubles-controlling-dead-sockets-through-select). Upon receiving the "server terminated" message, we terminate the client.*
+*We address Issue 1 by checking for the "server terminated" message (0 or an empty string) every time the client receives a message. Per advice [here](https://stackoverflow.com/questions/19795529/python-troubles-controlling-dead-sockets-through-select). Upon receiving the "server terminated" message, we terminate the client.*
+
+*We address Issue 2 by calling python encode('utf-8')/decode('utf-8') on all messages.*
+
+> **Arty: I dumb, pls detail how you addressed Issue 3.** 
 
 ## Wire Protocol
 
@@ -35,6 +54,10 @@ We use Python's `Lib/struct.py` to encode/decode messages efficiently and safely
 ### Transfer Buffer
 
 The transfer buffer defines the structure of any and all messages exchanged between the client and server. We define the transfer buffer in this project as the union of a *Message Code* and a *Payload*. The first byte of any exchanged message is the *Message Code*, and the remaining bytes are the *Payload*. The *Message Code* has a Format Character of `B`, which maps to a C `unsigned char`. Each *Message Code* maps to a *Message Type*, which is an internal identifier introduced for accessibility and readibilty purposes. For instance, the client program labels its commands via the associated *Message Type* that they broadcast. Message codes `0...5` are requests made by a client to the server, and message codes `6...8` are responses made by the server to a client. Each message code is described in detail below. The *Payload Parameters* are combined sequentially in-order to form the *Payload*.
+
+> **Arty: pls make edits to the wire protocol section as appropriate.** 
+
+> **Arty: do we need to justify inclusion/exclusion of any message codes/functionality?**
 
 ##### Requests 
 
@@ -54,4 +77,93 @@ Message Code: Type | Description | Payload Parameters
 6: `err` | Error message. | message:`256s`
 7: `suc` | Success message. | message:`256s`
 8: `nms` | New chat message. | from_username:`16s`, content:`512s`
+
+#### *February 17th, 2023*
+
+### Design Spec
+
+Design principles:
+1. Robustness against user: the server should not crash as the result of a client command. 
+2. Modularity: an account should not perform delete/logout actions on any other account.
+3. Robustness against network: communication should be reasonably robust to network failure.
+
+To uphold these principles, we:
+1. Implement rigorous error handling.
+2. Restrict logins:
+	1. Only allow one login per client connection.
+	2. Only allow one device logged in per account.
+		1. Optimizing for simplicity and code cleanliness.
+3. Queue messages to offline accounts.
+	1. Note: we do not require confirmation of message receipt.
+
+### Testing Infrastructure
+
+We build unit tests following the principles outlined by [Nathan Peck](https://medium.com/@nathankpeck/microservice-testing-unit-tests-d795194fe14e), via Medium. The goal of unit testing is to isolate/test specific functionality in a single network component. We implement unit testing in server_unit_tests.py. The first test suite is for account management functionality. We compare expected results against generated results, for a manually designed set of commands. The second test suite is for simple message functionality (processing & error handling), again via a manually designed set of commands. 
+
+We implement integrated testing in integrated_testing.py. The first test suite is for robustness against redundant or illogical commands. Runs a set of randomly generated commands from a single client. The second test suite is manually designed integrated testing, for all functionality over multiple clients. This is where most of the rigorous edge case testing takes place. The third test suite is once again for robustness, over a set of randomly generated commands, this time with multiple clients. 
+
+A couple design goals we kept in mind: we want our server to be deterministic, and our testing to be repeatable. Background research which was especially helpful in informing our infrastructure decisions: [Don't Write Tests](https://www.youtube.com/watch?v=hXnS_Xjwk2Y), and [Testing a Distributed System](https://queue.acm.org/detail.cfm?id=2800697).
+
+### Issues
+
+Testing revealed the following issues:
+1. Server allows multiple logins per client, returns a blank stare on deleteacc
+2. Multiple clients can log into the same account, but second client login forces first client logout
+3. No confirmation message sent on successful deleteacc
+4. Messages dropped if account logs off, logs back on
+5. Error statements for failed message delivery do not accurately descibe the error
+
+> **Arty: feel free to weigh in on/change my message queue**
+
+> **Open Issue: Client does not disconnect when Server crashes.****
+
+*We address Issue 1 by disallowing multiple accounts per client. We address Issue 2 by disallowing multiple clients per account.*
+
+*Issue 3 was an encoding error. Have fixed with .encode('utf-8')*
+
+*Issues 4 and 5 fixed via implementation of a message queue, and more rigorous error handling.*
+
+#### *February 19th, 2023*
+
+### gRPC
+> **One of Swati/Arty: general writeup about gRPC. Pref Arty**
+
+> **Swati: writeup about gRPC implementation. fix delete/message errors.**
+
+Command to generate gRPC code from users.proto:
+
+python3 -m grpc_tools.protoc -I./ --python_out=. --pyi_out=. --grpc_python_out=. ./users.proto
+
+Reference this post: https://groups.google.com/g/grpc-io/c/iLHgWC8o8UM/m/2PN4WaA9anMJ
+- lazy authentication (client manually adds a password)
+
+**Swati's crackhead 5am notes:**
+should store on server whether someone has already logged in?
+    that's kind of horrible though...
+ok, so you literally cannot login again to an account
+    you can only delete your own account (your account is stored client side)
+accdump, accfilter unchanged
+message
+I'm just going to mimic my wire protocol functionality exactly with gRPC, then discuss why gRPC lends itself poorly to certain things (ex login, authentication)
+    should also discuss what, if anything, gRPC lends itself well to: file:///Users/swatigoel/Downloads/p39-birrell.pdf
+also note: I guess I've made password functionality on wire protocol, and here, obsolete, but it was easier this way
+    or not entirely, because client might re log in!!
+transmute payload success or payload error functionality!!
+chat functionality via: https://melledijkstra.github.io/science/chatting-with-grpc-in-python
+delete: reasoning: if a client can login to an account (ie has access to an account password), they can delete that account. else, cannot
+
+#### *February 20th, 2023*
+
+### Results
+
+> **Swati: add something regarding test cases which still fail (login from m1, for example).**
+
+> **Arty: if you have time to implement any sort of efficiency testing, amazing**
+
+
+### Discussion
+
+> **One of Swati/Arty: Write a para comparing efficiency of wire protocol and gRPC. Pref Arty.** 
+
+> **Sub question: constrain size of command arguments? how in wire protocol vs grpc**
 

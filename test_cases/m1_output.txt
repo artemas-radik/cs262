@@ -1,0 +1,16 @@
+Registered arty.
+Registered arty2.
+Registered arty3.
+Username already registered.
+Wrong password.
+Authenticated arty.
+Users: arty, arty2, arty3.
+Account deleted.
+Not authenticated.
+Users: arty2, arty3.
+Not authenticated.
+Users: arty2.
+Authenticated arty2.
+Ma'am, you are already logged in.
+Account deleted.
+Users: arty3.
