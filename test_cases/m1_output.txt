@@ -2,7 +2,7 @@
 [SUCCESS] Registered arty2.
 [SUCCESS] Registered arty3.
 [WARNING] Username already registered.
-[WARNING] Username not found.
+[WARNING] Wrong password.
 [SUCCESS] Authenticated arty.
 [SUCCESS] Users: arty, arty2, arty3.
 [SUCCESS] Account deleted.
@@ -17,5 +17,3 @@
 [SUCCESS] Users: arty3.
 
 [SUCCESS] No Matching accounts.
-
-DELETES CURRENTLY ARE BROKEN. Will not match expected behavior.

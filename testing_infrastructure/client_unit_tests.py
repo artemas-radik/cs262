@@ -1,17 +1,10 @@
 import unittest
 import sys
-#import client
-from client import Payload, encode, decode #wrap in package
+sys.path.insert(1, '../')
+from client import Payload, encode, decode
 import random
 import string
 from enum import Enum
-
-"""
-task list:
-1) integrated testing (1am-4am)
-3) rpc implementation (9pm-1am)
-4) push (4am-5am)
-"""
 
 def randomized_commands(n, m, fname):
     letters = string.ascii_lowercase #thanks https://pynative.com/python-generate-random-string/
@@ -44,11 +37,10 @@ class TestClient(unittest.TestCase):
         self.assertEqual(1, 1)
     
     def test_inverse(self):
-        fname = "commands_lst.txt"
+        fname = "../test_cases/commands_lst.txt"
         with open(fname, 'r') as fp:
             comm = fp.readline().strip('\n')
             self.assertEqual(decode(encode(comm)), comm) #obviously the issue, because I'm fucking dumb, is that we need client encode and server decode. come back to unit tests
-
 
 if __name__ == '__main__':
     unittest.main()
