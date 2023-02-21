@@ -39,6 +39,11 @@ class UserTableStub(object):
                 request_serializer=users__pb2.filterUsers.SerializeToString,
                 response_deserializer=users__pb2.requestReply.FromString,
                 )
+        self.MessageUser = channel.unary_unary(
+                '/UserTable/MessageUser',
+                request_serializer=users__pb2.messageUser.SerializeToString,
+                response_deserializer=users__pb2.requestReply.FromString,
+                )
 
 
 class UserTableServicer(object):
@@ -74,6 +79,12 @@ class UserTableServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def MessageUser(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_UserTableServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -100,6 +111,11 @@ def add_UserTableServicer_to_server(servicer, server):
             'FilterUsers': grpc.unary_unary_rpc_method_handler(
                     servicer.FilterUsers,
                     request_deserializer=users__pb2.filterUsers.FromString,
+                    response_serializer=users__pb2.requestReply.SerializeToString,
+            ),
+            'MessageUser': grpc.unary_unary_rpc_method_handler(
+                    servicer.MessageUser,
+                    request_deserializer=users__pb2.messageUser.FromString,
                     response_serializer=users__pb2.requestReply.SerializeToString,
             ),
     }
@@ -193,6 +209,23 @@ class UserTable(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/UserTable/FilterUsers',
             users__pb2.filterUsers.SerializeToString,
+            users__pb2.requestReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def MessageUser(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/UserTable/MessageUser',
+            users__pb2.messageUser.SerializeToString,
             users__pb2.requestReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -14,7 +14,7 @@ python3 server.py 10.250.243.199 5000
 python3 client.py 10.250.243.199 5000
 ```
 
-> **One of Swati/Arty: decide/set up demo day. Write demo day guide.** 
+> **One of Swati/Arty: decide/set up demo day. Write demo day guide. Pref Arty.** 
 
 > **Sub issue: link w adarsh/andrew (or karly, or kayla, or kat) to exchange code, prior to demo day?**
  
@@ -92,7 +92,9 @@ To uphold these principles, we:
 
 ### Testing Infrastructure
 
-We build unit tests with [UnitTest](https://docs.python.org/3/library/unittest.html), a python library providing a nice testing framework.
+We build unit tests with [UnitTest](https://docs.python.org/3/library/unittest.html), a python library providing a nice testing framework. 
+
+> **Swati: separate tests into files, describe tests here, discuss results below**
 
 Server design: We want our server to be deterministic.
 Testing design: repeatability
@@ -118,14 +120,17 @@ Testing revealed the following issues:
 
 #### *February 19th, 2023*
 
-### RPC
+### gRPC
+> **One of Swati/Arty: general writeup about gRPC. Pref Arty**
 
-Command to generate gRPC code from users.proto
+> **Swati: writeup about gRPC implementation. fix delete/message errors.**
+
+Command to generate gRPC code from users.proto:
 
 python3 -m grpc_tools.protoc -I./ --python_out=. --pyi_out=. --grpc_python_out=. ./users.proto
 
 Reference this post: https://groups.google.com/g/grpc-io/c/iLHgWC8o8UM/m/2PN4WaA9anMJ
-lazy auth
+- lazy authentication (client manually adds a password)
 
 #### *February 20th, 2023*
 

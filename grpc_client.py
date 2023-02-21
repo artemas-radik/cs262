@@ -31,6 +31,8 @@ def run(server_addy, comm):
                 response = stub.DumpUsers(users_pb2.dumpUsers())
             case "accfilter":
                 response = stub.FilterUsers(users_pb2.filterUsers(wildcard=elements[1]))
+            case "message":
+                response = stub.MessageUser(users_pb2.messageUser(username=elements[1], from_user = account[1], m = elements[2]))
             case _:
                 print("[FAILURE] Incorrect command usage.")
         print (response)
@@ -38,7 +40,8 @@ def run(server_addy, comm):
 
 if __name__ == '__main__':
     logging.basicConfig()
-    #ip = str(sys.argv[1]) #currently not using command line ip address (assuming localhost)
-    #port = int(sys.argv[2]) #currently not using command line port
-    comm = input() #add permanent listener, and server broadcast listener
-    run('localhost:50051', comm)
+    ip = str(sys.argv[1]) #asssume ip = 'Localhost' for now
+    port = int(sys.argv[2])
+    while True:
+        comm = input()
+        run(f'{ip}:{port}', comm)

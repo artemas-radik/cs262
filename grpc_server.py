@@ -1,6 +1,7 @@
 #massive thanks: https://github.com/grpc/grpc/blob/master/examples/protos/helloworld.proto
 
 from concurrent import futures
+import sys
 import logging
 import re
 
@@ -30,7 +31,7 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         else:
             return users_pb2.requestReply(reply= f"Username not found.")
 
-    def DeleteUser(self, request, context): #have not tested delete yet
+    def DeleteUser(self, request, context): #delete breaks
         if request.username in accounts.keys():
             if request.username == request.from_user and accounts[request.username] == request.password:
                 #simple auth
@@ -62,9 +63,23 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         else: 
             return users_pb2.requestReply(reply= f"No accounts found.")
     
+    def MessageUser(self, request, context):
+        logged_in = False
+        uname = "Guest"
+        if request.username not in accounts:
+            return users_pb2.requestReply("User dne.")
+        """try:
+            #HOW TO IMPLEMENT IF WE DON'T HAVE A WAY OF IDENTIFYING CLIENT?
+        try:
+            for username in accounts:
+                if accounts[username].socket == socket:
+                    logged_in = True
+                    uname = username
+                    accounts[command[1]].socket.send(f'<{username}> {" ".join(command[2:])}'.encode('utf-8'))
+                    return"""
 
-def serve():
-    port = '50051'
+def serve(port):
+    #port = '50051'
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     users_pb2_grpc.add_UserTableServicer_to_server(UserTable(), server)
     server.add_insecure_port('[::]:' + port)
@@ -75,4 +90,5 @@ def serve():
 
 if __name__ == '__main__':
     logging.basicConfig()
-    serve()
+    port = str(sys.argv[1]) #assumes ip = localhost
+    serve(port)

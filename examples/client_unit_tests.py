@@ -1,3 +1,5 @@
+#EXAMPLE BY SWATI/ARTEMAS
+
 import unittest
 import sys
 sys.path.insert(1, '../')

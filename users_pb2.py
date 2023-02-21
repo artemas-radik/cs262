@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0busers.proto\"P\n\x0cregisterUser\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x1c\n\x05reply\x18\x03 \x01(\x0b\x32\r.requestReply\"M\n\tloginUser\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x1c\n\x05reply\x18\x03 \x01(\x0b\x32\r.requestReply\"O\n\ndeleteUser\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x11\n\tfrom_user\x18\x02 \x01(\t\x12\x1c\n\x05reply\x18\x03 \x01(\x0b\x32\r.requestReply\")\n\tdumpUsers\x12\x1c\n\x05reply\x18\x01 \x01(\x0b\x32\r.requestReply\"=\n\x0b\x66ilterUsers\x12\x10\n\x08wildcard\x18\x01 \x01(\t\x12\x1c\n\x05reply\x18\x02 \x01(\x0b\x32\r.requestReply\"\x1d\n\x0crequestReply\x12\r\n\x05reply\x18\x01 \x01(\t2\xdf\x01\n\tUserTable\x12,\n\x0cRegisterUser\x12\r.registerUser\x1a\r.requestReply\x12&\n\tLoginUser\x12\n.loginUser\x1a\r.requestReply\x12(\n\nDeleteUser\x12\x0b.deleteUser\x1a\r.requestReply\x12&\n\tDumpUsers\x12\n.dumpUsers\x1a\r.requestReply\x12*\n\x0b\x46ilterUsers\x12\x0c.filterUsers\x1a\r.requestReplyb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0busers.proto\"P\n\x0cregisterUser\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x1c\n\x05reply\x18\x03 \x01(\x0b\x32\r.requestReply\"M\n\tloginUser\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x1c\n\x05reply\x18\x03 \x01(\x0b\x32\r.requestReply\"O\n\ndeleteUser\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x11\n\tfrom_user\x18\x02 \x01(\t\x12\x1c\n\x05reply\x18\x03 \x01(\x0b\x32\r.requestReply\")\n\tdumpUsers\x12\x1c\n\x05reply\x18\x01 \x01(\x0b\x32\r.requestReply\"=\n\x0b\x66ilterUsers\x12\x10\n\x08wildcard\x18\x01 \x01(\t\x12\x1c\n\x05reply\x18\x02 \x01(\x0b\x32\r.requestReply\"[\n\x0bmessageUser\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x11\n\tfrom_user\x18\x02 \x01(\t\x12\t\n\x01m\x18\x03 \x01(\t\x12\x1c\n\x05reply\x18\x04 \x01(\x0b\x32\r.requestReply\"\x1d\n\x0crequestReply\x12\r\n\x05reply\x18\x01 \x01(\t2\x8b\x02\n\tUserTable\x12,\n\x0cRegisterUser\x12\r.registerUser\x1a\r.requestReply\x12&\n\tLoginUser\x12\n.loginUser\x1a\r.requestReply\x12(\n\nDeleteUser\x12\x0b.deleteUser\x1a\r.requestReply\x12&\n\tDumpUsers\x12\n.dumpUsers\x1a\r.requestReply\x12*\n\x0b\x46ilterUsers\x12\x0c.filterUsers\x1a\r.requestReply\x12*\n\x0bMessageUser\x12\x0c.messageUser\x1a\r.requestReplyb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'users_pb2', globals())
@@ -30,8 +30,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _DUMPUSERS._serialized_end=298
   _FILTERUSERS._serialized_start=300
   _FILTERUSERS._serialized_end=361
-  _REQUESTREPLY._serialized_start=363
-  _REQUESTREPLY._serialized_end=392
-  _USERTABLE._serialized_start=395
-  _USERTABLE._serialized_end=618
+  _MESSAGEUSER._serialized_start=363
+  _MESSAGEUSER._serialized_end=454
+  _REQUESTREPLY._serialized_start=456
+  _REQUESTREPLY._serialized_end=485
+  _USERTABLE._serialized_start=488
+  _USERTABLE._serialized_end=755
 # @@protoc_insertion_point(module_scope)

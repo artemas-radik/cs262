@@ -38,6 +38,18 @@ class loginUser(_message.Message):
     username: str
     def __init__(self, username: _Optional[str] = ..., password: _Optional[str] = ..., reply: _Optional[_Union[requestReply, _Mapping]] = ...) -> None: ...
 
+class messageUser(_message.Message):
+    __slots__ = ["from_user", "m", "reply", "username"]
+    FROM_USER_FIELD_NUMBER: _ClassVar[int]
+    M_FIELD_NUMBER: _ClassVar[int]
+    REPLY_FIELD_NUMBER: _ClassVar[int]
+    USERNAME_FIELD_NUMBER: _ClassVar[int]
+    from_user: str
+    m: str
+    reply: requestReply
+    username: str
+    def __init__(self, username: _Optional[str] = ..., from_user: _Optional[str] = ..., m: _Optional[str] = ..., reply: _Optional[_Union[requestReply, _Mapping]] = ...) -> None: ...
+
 class registerUser(_message.Message):
     __slots__ = ["password", "reply", "username"]
     PASSWORD_FIELD_NUMBER: _ClassVar[int]

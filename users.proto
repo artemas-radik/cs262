@@ -27,6 +27,13 @@ message filterUsers {
     requestReply reply = 2;
 }
 
+message messageUser {
+    string username = 1;
+    string from_user = 2;
+    string m = 3;
+    requestReply reply = 4;
+}
+
 message requestReply {
     string reply = 1; //repeated string usersList
 }
@@ -38,4 +45,5 @@ service UserTable {
     
     rpc DumpUsers (dumpUsers) returns (requestReply);
     rpc FilterUsers (filterUsers) returns (requestReply);
+    rpc MessageUser (messageUser) returns (requestReply);
 }

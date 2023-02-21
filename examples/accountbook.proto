@@ -1,6 +1,5 @@
+//CREDITS PROF JAMES WALDO
 syntax = "proto3"
-
-#package accountbook;
 
 message Account {
     int32 id = 1;
