@@ -13,11 +13,13 @@ python3 server.py 10.250.243.199 5000
 python3 client.py 10.250.243.199 5000
 ```
 
- #h/red==One of Swati or Artemas, decide/set up how we'll hand code off to our project partners. Describe here. ==
+**One of Swati/Arty: decide/set up demo day. Write demo day guide.
+	- sub issue: link w adarsh/andrew (or karly, or kayla, or kat) to exchange code, prior to demo day?
+**
  
- #h/red==One of Swati or Artemas, check project spec against what's currently in the engineering notebook. ==
+**One of Swati/Arty: check assignment spec against current engineering notebook & code.**
 
-#h/red ==Swati: go through and comment code.==
+**Swati: comment the code, in a reasonable timeframe so Arty can iterate, if desired.**
 
 # Engineering Notebook
 #### *February 7th, 2023*
@@ -30,7 +32,7 @@ We started the project today by following a guide for a similar project availabl
 
 *We address Issue 2 by calling python encode('utf-8')/decode('utf-8') on all messages.*
 
-#h/red ==Artemas, I'm dumb, please detail how we/you addressed Issue 3.==
+**Arty: I dumb, pls detail how you addressed Issue 3.**
 
 ## Wire Protocol
 
@@ -46,7 +48,8 @@ We use Python's `Lib/struct.py` to encode/decode messages efficiently and safely
 
 The transfer buffer defines the structure of any and all messages exchanged between the client and server. We define the transfer buffer in this project as the union of a *Message Code* and a *Payload*. The first byte of any exchanged message is the *Message Code*, and the remaining bytes are the *Payload*. The *Message Code* has a Format Character of `B`, which maps to a C `unsigned char`. Each *Message Code* maps to a *Message Type*, which is an internal identifier introduced for accessibility and readibilty purposes. For instance, the client program labels its commands via the associated *Message Type* that they broadcast. Message codes `0...5` are requests made by a client to the server, and message codes `6...8` are responses made by the server to a client. Each message code is described in detail below. The *Payload Parameters* are combined sequentially in-order to form the *Payload*.
 
-#h/red ==Artemas, pls make edits to the wire protocol section as appropriate.==
+**Arty: pls make edits to the wire protocol section as appropriate.**
+**Arty: do we need to justify inclusion/exclusion of any message codes/functionality?**
 
 ##### Requests 
 
@@ -71,17 +74,29 @@ Message Code: Type | Description | Payload Parameters
 
 ### Test Infrastructure
 
+Design principles:
+1. Robustness against user: the server should not crash as the result of a client command. 
+2. Modularity: an account should not perform delete/logout actions on any other account.
+3. Robustness against network: communication should be reasonably robust to network failure.
 
+To uphold these principles, we:
+1. Implement rigorous error handling.
+2. Restrict logins:
+	1. Only allow one login per client connection.
+	2. Only allow one device logged in per account.
+		1. Optimizing for simplicity and code cleanliness.
+3. Queue messages to offline accounts.
+	1. Note: we do not require confirmation of message receipt.
 
 ### Issues
 
 *Issue: Server allows multiple logins to different accounts from same client, but freaks tf out when deleteacc is subsequently called.*
 *Issue: A second client login to same account --> forced logout of first client*
 *Issue: deleteacc confirmation not sending*
-*Issue: Messages do not queue when client is temporarily logged off* #h/red==Artemas, please weigh in if I dealt with this suboptimally==
+*Issue: Messages do not queue when client is temporarily logged off* **Artemas, please weigh in if I dealt with this suboptimally**
 *Issue: Error statements for failed message deliver do not accurately describe the failure*
 
-#h/red==Still open: *Issue: Client does not disconnect when Server crashes.*==
+**Still open: *Issue: Client does not disconnect when Server crashes.**
 
 #### *February 19th, 2023*
 
@@ -91,3 +106,61 @@ Message Code: Type | Description | Payload Parameters
 
 ### Results
 
+
+##### Testing Framework
+
+  
+  
+
+https://www.quora.com/How-do-I-test-a-distributed-system
+
+Concurrency bugs
+
+Inadequate failure handling
+
+Incorrect input validation (usually leading to security bugs) or flawed threat models
+
+  
+  
+
+https://web.stanford.edu/~engler/osdi2002.pdf
+
+- not model checker
+
+  
+  
+
+https://www.cs.cmu.edu/~aldrich/courses/17-355-18sp/notes/notes14-symbolic-execution.pdf
+
+- symbolic execution isn't really testing our potential fail points
+
+  
+  
+
+https://docs.python.org/3/library/unittest.html
+
+- library providing testing framework
+
+  
+
+Server design:
+
+- We want our server to be deterministic.
+
+  
+
+Testing design:
+
+- repeatability
+
+  
+
+Command to generate gRPC code from users.proto
+
+python3 -m grpc_tools.protoc -I./ --python_out=. --pyi_out=. --grpc_python_out=. ./users.proto
+
+  
+
+Reference this post: https://groups.google.com/g/grpc-io/c/iLHgWC8o8UM/m/2PN4WaA9anMJ
+
+- lazy auth
