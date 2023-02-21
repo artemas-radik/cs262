@@ -5,14 +5,16 @@ from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Opti
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class deleteUser(_message.Message):
-    __slots__ = ["from_user", "reply", "username"]
+    __slots__ = ["from_user", "password", "reply", "username"]
     FROM_USER_FIELD_NUMBER: _ClassVar[int]
+    PASSWORD_FIELD_NUMBER: _ClassVar[int]
     REPLY_FIELD_NUMBER: _ClassVar[int]
     USERNAME_FIELD_NUMBER: _ClassVar[int]
     from_user: str
+    password: str
     reply: requestReply
     username: str
-    def __init__(self, username: _Optional[str] = ..., from_user: _Optional[str] = ..., reply: _Optional[_Union[requestReply, _Mapping]] = ...) -> None: ...
+    def __init__(self, username: _Optional[str] = ..., from_user: _Optional[str] = ..., password: _Optional[str] = ..., reply: _Optional[_Union[requestReply, _Mapping]] = ...) -> None: ...
 
 class dumpUsers(_message.Message):
     __slots__ = ["reply"]

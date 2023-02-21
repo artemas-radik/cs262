@@ -44,6 +44,11 @@ class UserTableStub(object):
                 request_serializer=users__pb2.messageUser.SerializeToString,
                 response_deserializer=users__pb2.requestReply.FromString,
                 )
+        self.SubscribeMessages = channel.unary_stream(
+                '/UserTable/SubscribeMessages',
+                request_serializer=users__pb2.requestReply.SerializeToString,
+                response_deserializer=users__pb2.messageUser.FromString,
+                )
 
 
 class UserTableServicer(object):
@@ -85,6 +90,12 @@ class UserTableServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SubscribeMessages(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_UserTableServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -117,6 +128,11 @@ def add_UserTableServicer_to_server(servicer, server):
                     servicer.MessageUser,
                     request_deserializer=users__pb2.messageUser.FromString,
                     response_serializer=users__pb2.requestReply.SerializeToString,
+            ),
+            'SubscribeMessages': grpc.unary_stream_rpc_method_handler(
+                    servicer.SubscribeMessages,
+                    request_deserializer=users__pb2.requestReply.FromString,
+                    response_serializer=users__pb2.messageUser.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -227,5 +243,22 @@ class UserTable(object):
         return grpc.experimental.unary_unary(request, target, '/UserTable/MessageUser',
             users__pb2.messageUser.SerializeToString,
             users__pb2.requestReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SubscribeMessages(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/UserTable/SubscribeMessages',
+            users__pb2.requestReply.SerializeToString,
+            users__pb2.messageUser.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -15,7 +15,8 @@ message loginUser {
 message deleteUser {
     string username = 1;
     string from_user = 2;
-    requestReply reply = 3;
+    string password = 3;
+    requestReply reply = 4;
 }
 
 message dumpUsers {
@@ -46,4 +47,5 @@ service UserTable {
     rpc DumpUsers (dumpUsers) returns (requestReply);
     rpc FilterUsers (filterUsers) returns (requestReply);
     rpc MessageUser (messageUser) returns (requestReply);
+    rpc SubscribeMessages (requestReply) returns (stream messageUser) {}
 }

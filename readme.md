@@ -149,6 +149,7 @@ I'm just going to mimic my wire protocol functionality exactly with gRPC, then d
 also note: I guess I've made password functionality on wire protocol, and here, obsolete, but it was easier this way
     or not entirely, because client might re log in!!
 transmute payload success or payload error functionality!!
+chat functionality via: https://melledijkstra.github.io/science/chatting-with-grpc-in-python
 
 #### *February 20th, 2023*
 

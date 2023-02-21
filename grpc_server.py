@@ -13,7 +13,7 @@ accounts = {}
 
 """
 TODO:
-fix delete/messaging on gRPC (estimated time = 90 minutes)
+fix messaging on gRPC
 """
 
 class UserTable(users_pb2_grpc.UserTableServicer):
@@ -34,7 +34,7 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         else:
             return users_pb2.requestReply(reply= f"Username not found.")
 
-    def DeleteUser(self, request, context): #delete breaks
+    def DeleteUser(self, request, context):
         if request.username in accounts.keys():
             if request.username == request.from_user and accounts[request.username] == request.password:
                 #simple auth
