@@ -1,6 +1,7 @@
 import socket, select, sys
 
 if __name__ == "__main__":
+    # hard coded to our azure server, but user can specify IP/PORT
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try: 
         ip = str(sys.argv[1])
@@ -10,6 +11,7 @@ if __name__ == "__main__":
         port = 5000
     server.connect((ip, port))
 
+    # accept user input and messages from server continually and simultaneously
     while True:
         sockets_list = [sys.stdin, server]
         read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
