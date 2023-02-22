@@ -16,8 +16,9 @@ python3.10 client.py
 ```
 
 ## Usage
+Let's say our username is `hello` and our password is `world`. After starting the client we would run `register hello world` to register our account, followed by `login hello world` to log ourselves in. Now that we are authenticated we are free to send and receive messages, retrieve account usernames, and delete our account. A full table of command functionality is included below.
 
-Command | Description 
+Command & Parameters | Description 
 ------------ | ------------ 
 `register [USR] [PWD]` | Register account. 
 `login [USR] [PWD]` | Login existing account. 
@@ -26,25 +27,30 @@ Command | Description
 `accfilter [WLDCRD]` | Filter account names. 
 `message [USR] [MSG]` | Send a chat message to a user. 
 
-
-
-Replace cases of `10.250.243.199` with your private IP address, obtained by running `ipconfig getifaddr en0` on wireless networks and `ipconfig getifaddr en1` on wired networks.
-
-### Server
-```bash
-python3 server.py 10.250.243.199 5000
-```
-
+# Manual Start
 ## Client
+The client program takes two runtime parameters, an IP address and port. These parameters are hardcoded to default to `52.152.216.212` and `5000`, where we're hosting our server on Azure. Here is a sample usage of the client, to connect to our Azure server.
 ```bash
-python3 client.py 10.250.243.199 5000
+python3.10 client.py 52.152.216.212 5000
 ```
+There is also our gRPC implementation of the client, which is started similarly.
+> Note that we are not hosting an instance of the gRPC server.
+```bash
+python3.10 grpc_client.py 52.152.216.212 5001
+```
+## Server
+The server program also takes two runtime parameters, an IP address and port. If you're on MacOS you can get your IP address by running `ipconfig getifaddr en0` on wireless networks and `ipconfig getifaddr en1` on wired networks. Here is a sample usage of the server, as we start it on our Azure server.
+```bash
+python3.10 server.py 52.152.216.212 5000
+```
+There is also our gRPC implementation of the server, which is started similarly.
+```bash
+python3.10 grpc_server.py 52.152.216.212 5001
+```
+## Tests
+### Wire Protocol
 
-> **One of Swati/Arty: decide/set up demo day. Write demo day guide. Pref Arty.** 
 
-> **Swati: comment the grpc and testing code.
-
-> **Arty: comment the wire protocol code.**
 
 # Engineering Notebook
 #### *February 7th, 2023*
