@@ -137,13 +137,14 @@ The system is robust against incorrect usage, but does not have specific error m
 
 Paddle Test:
 
-Wire Protocol Paddle Test ("yo"):
-Messages Exchanged (30 seconds): 619171
+Wire Protocol Paddle Test ("1"):
+Messages Exchanged (30 seconds): 575269
 
-gRPC Paddle Test ("yo"):
+gRPC Paddle Test ("1"):
 Messages Exchanged (30 seconds): 1246
 
 Wire Protocol Paddle Test ("1111111111111111111111111111111111111111111111111111111111111111"):
-
+Messages Exchanged (30 seconds): 512541
 
 gRPC Paddle Test ('1111111111111111111111111111111111111111111111111111111111111111'):
+Messages Exchanged (30 seconds): 512541

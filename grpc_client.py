@@ -33,7 +33,7 @@ class Client:
                     self.account[1] = elements[2]
             case "deleteacc":
                 try:
-                    response = self.stub.DeleteUser(users_pb2.deleteUser(username=elements[1], from_user = self.account[0], password=self.account[1]))
+                    response = self.stub.DeleteUser(users_pb2.deleteUser(username=self.account[0], from_user = self.account[0], password=self.account[1]))
                     if (response.reply.find("Del") != -1):
                         self.account[0] = -1
                         self.account[1] = -1

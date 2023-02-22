@@ -26,7 +26,7 @@ def paddle_tests(ip, port, verbose=False):
                 if (i == 1):
                     server.send("login a b".encode('utf-8'))
                 elif (i > 1):
-                    server.send("message a 1111111111111111111111111111111111111111111111111111111111111111".encode('utf-8'))
+                    server.send("message a 1".encode('utf-8'))
                 i += 1
             else:
                 pass
