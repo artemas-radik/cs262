@@ -28,7 +28,7 @@ Command & Parameters | Description
 `message [USR] [MSG]` | Send a chat message to a user. 
 
 # Manual Start
-## Client
+### Client
 The client program takes two runtime parameters, an IP address and port. These parameters are hardcoded to default to `52.152.216.212` and `5000`, where we're hosting our server on Azure. Here is a sample usage of the client, to connect to our Azure server.
 ```bash
 python3.10 client.py 52.152.216.212 5000
@@ -38,7 +38,7 @@ There is also our gRPC implementation of the client, which is started similarly.
 ```bash
 python3.10 grpc_client.py 52.152.216.212 5001
 ```
-## Server
+### Server
 The server program also takes two runtime parameters, an IP address and port. If you're on MacOS you can get your IP address by running `ipconfig getifaddr en0` on wireless networks and `ipconfig getifaddr en1` on wired networks. Here is a sample usage of the server, as we start it on our Azure server.
 ```bash
 python3.10 server.py 52.152.216.212 5000
@@ -47,8 +47,10 @@ There is also our gRPC implementation of the server, which is started similarly.
 ```bash
 python3.10 grpc_server.py 52.152.216.212 5001
 ```
-## Tests
-### Wire Protocol
+### Tests
+We have built test suites for 
+
+
 
 
 
