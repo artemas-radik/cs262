@@ -100,6 +100,10 @@ def serve(ip, port):
 
 if __name__ == '__main__':
     logging.basicConfig()
-    ip = str(sys.argv[1])
-    port = str(sys.argv[2])
+    try: 
+        ip = str(sys.argv[1])
+        port = str(sys.argv[2])
+    except:
+        ip = "52.152.216.212"
+        port = "5001"
     serve(ip, port)

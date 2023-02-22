@@ -2,7 +2,13 @@ import socket, select, sys
 
 if __name__ == "__main__":
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.connect((str(sys.argv[1]), int(sys.argv[2])))
+    try: 
+        ip = str(sys.argv[1])
+        port = int(sys.argv[2])
+    except:
+        ip = "52.152.216.212"
+        port = 5000
+    server.connect((ip, port))
 
     while True:
         sockets_list = [sys.stdin, server]

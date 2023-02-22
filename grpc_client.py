@@ -64,8 +64,12 @@ class Client:
 
 if __name__ == '__main__':
     logging.basicConfig()
-    ip = str(sys.argv[1]) #asssume ip = 'Localhost' for now
-    port = int(sys.argv[2])
+    try:
+        ip = str(sys.argv[1]) #asssume ip = 'Localhost' for now
+        port = int(sys.argv[2])
+    except:
+        ip = "52.152.216.212"
+        port = "5001"
     client_start = Client(f'{ip}:{port}')
 
     while True:
