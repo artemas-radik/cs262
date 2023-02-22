@@ -15,7 +15,16 @@ You can still use our prehosted server, but we have not precompiled a binary for
 python3.10 client.py
 ```
 
+## Usage
 
+Command | Description 
+------------ | ------------ 
+`register [USR] [PWD]` | Register account. 
+`login [USR] [PWD]` | Login existing account. 
+`deleteacc` | Delete account. 
+`accdump`| Dump all account names. 
+`accfilter [WLDCRD]` | Filter account names. 
+`message [USR] [MSG]` | Send a chat message to a user. 
 
 
 
