@@ -29,11 +29,16 @@ class Client:
             case "login":
                 response = self.stub.LoginUser(users_pb2.loginUser(username=elements[1], password=elements[2]))
                 if (response.reply.find("Auth") != -1):
-                    self.account = [elements[1], elements[2]]
+                    self.account[0] = elements[1]
+                    self.account[1] = elements[2]
             case "deleteacc":
-                response = self.stub.DeleteUser(users_pb2.deleteUser(username=elements[1], from_user = self.account[0], password=self.account[1]))
-                if (response.reply.find("Del") != -1):
-                    self.account = [-1,-1]
+                try:
+                    response = self.stub.DeleteUser(users_pb2.deleteUser(username=self.account[0], from_user = self.account[0], password=self.account[1]))
+                    if (response.reply.find("Del") != -1):
+                        self.account[0] = -1
+                        self.account[1] = -1
+                except:
+                    pass
             case "accdump":
                 response = self.stub.DumpUsers(users_pb2.dumpUsers())
             case "accfilter":

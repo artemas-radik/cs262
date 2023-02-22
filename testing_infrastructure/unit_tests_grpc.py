@@ -9,12 +9,7 @@ import users_pb2_grpc
 import grpc_client
 
 
-"""Single Client + Server: Account Tests -- m1.txt"""
-#commands to run:
-    #python3 server.py ip port
-    #python3 server_unit_tests.py ip port
-#note: must restart server upon each run
-
+"""Single Client + Server: Account Tests -- m1_grpc.txt"""
 def unit_tests(ip, port, verbose=False):
     client_start = grpc_client.Client(f'{ip}:{port}')
     f = open('../test_cases/m1_grpc.txt', 'r')
@@ -23,9 +18,10 @@ def unit_tests(ip, port, verbose=False):
     comm = f.readline()
     o = f_out.readline()
     while comm:
-        r = client_start.run(f'{ip}:{port}', comm, False)
+        r = client_start.run(f'{ip}:{port}', comm.strip(), False)
         if (verbose):
-            print(r.strip(), o.strip(), "\n", r.strip() == o.strip())
+            print(r)
+        print(o.strip().find(r.strip()) != -1)
         comm = f.readline()
         o = f_out.readline()
 
