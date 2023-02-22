@@ -1,5 +1,5 @@
 
-# Quickstart
+# Client Quickstart
 To make demo day convenient, we have precompiled our client for unix-based systems and defaulted it to connecting to a prehosted version of our server running on Azure cloud.
 ### Unix-Based Systems (MacOS, Linux)
 Make sure you are in the root `cs262` directory. Run the precompiled binary with the following command:
@@ -8,6 +8,11 @@ Make sure you are in the root `cs262` directory. Run the precompiled binary with
 ```
 
 ### Windows
+*Note: Not tested on Windows.*
+You can still use our prehosted server, but we have not precompiled a binary for you. You will have to run our client using Python `3.10` or `3.11`.
+```bash
+python3.10 client.py
+```
 
 
 
