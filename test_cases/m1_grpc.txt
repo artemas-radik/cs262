@@ -1,0 +1,16 @@
+register arty muskaan
+register arty2 muskaan
+register arty3 anna
+register arty3 muskaan
+login arty naomi
+login arty muskaan
+accdump 
+deleteacc arty 
+deleteacc
+accdump 
+deleteacc 
+accfilter arty2 
+login arty2 muskaan
+login arty3 muskaan
+deleteacc
+accdump 
