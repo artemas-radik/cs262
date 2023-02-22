@@ -19,18 +19,21 @@ class Client:
         self.chat_list = []
         threading.Thread(target=self.__listen_for_messages, daemon=True).start()
 
-    def run(self, server_addy, comm):
+    def run(self, server_addy, comm, v=True):
         elements = comm.split(' ')
 
-        response = "[FAILURE] Incorrect command usage."
+        response = 0
         match elements[0]:
             case "register":
                 response = self.stub.RegisterUser(users_pb2.registerUser(username=elements[1], password=elements[2]))
             case "login":
-                self.account = elements[1], elements[2]
                 response = self.stub.LoginUser(users_pb2.loginUser(username=elements[1], password=elements[2]))
+                if (response.reply.find("Auth") != -1):
+                    self.account = [elements[1], elements[2]]
             case "deleteacc":
                 response = self.stub.DeleteUser(users_pb2.deleteUser(username=elements[1], from_user = self.account[0], password=self.account[1]))
+                if (response.reply.find("Del") != -1):
+                    self.account = [-1,-1]
             case "accdump":
                 response = self.stub.DumpUsers(users_pb2.dumpUsers())
             case "accfilter":
@@ -39,8 +42,15 @@ class Client:
                 if self.account[0] != -1:
                     response = self.stub.MessageUser(users_pb2.messageUser(username=elements[1], from_user = self.account[0], m = ' '.join(elements[2:])))
             case _:
-                print("[FAILURE] Incorrect command usage.")
-        print(response.reply)
+                pass
+        if response != 0:
+            response = response.reply
+        else:
+            response = "[FAILURE] Incorrect command usage."
+        if v:
+            print(response)
+        else:
+            return(response)
 
     def __listen_for_messages(self): #update conn input here
         """

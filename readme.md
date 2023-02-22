@@ -130,5 +130,3 @@ The system is robust against incorrect usage, but does not have specific error m
 
 > **One of Swati/Arty: Write a para comparing efficiency of wire protocol and gRPC. Pref Arty.** 
 
-> **Sub question: constrain size of command arguments? how in wire protocol vs grpc**
-
