@@ -8,7 +8,7 @@ Make sure you are in the root `cs262` directory. Run the precompiled binary with
 ```
 
 ### Windows
-> Note: Not tested on Windows.
+> Note that we have not tested on Windows, so support is experimental.
 
 You can still use our prehosted server, but we have not precompiled a binary for you. You will have to run our client using Python `3.10` or `3.11`.
 ```bash
