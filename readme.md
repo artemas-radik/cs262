@@ -1,9 +1,4 @@
 
-## TODOS:
-- decide how we're packaging this for demo day
-- comment the code
-- (smaller todos are listed throughout this document. but truly, we could just ignore them. depends on how much time we have)
-
 # Getting Started
 *Tested on MacOS Ventura 13.2 with Python 3.9.6 Installed*
 
@@ -21,10 +16,6 @@ python3 client.py 10.250.243.199 5000
 
 > **One of Swati/Arty: decide/set up demo day. Write demo day guide. Pref Arty.** 
 
-> **Sub issue: link w adarsh/andrew (or karly, or kayla, or kat) to exchange code, prior to demo day?**
- 
-> **One of Swati/Arty: check assignment spec against current engineering notebook & code.**
-
 > **Swati: comment the grpc and testing code.
 
 > **Arty: comment the wire protocol code.**
@@ -39,8 +30,6 @@ We started the project today by following a guide for a similar project availabl
 *We address Issue 1 by checking for the "server terminated" message (0 or an empty string) every time the client receives a message. Per advice [here](https://stackoverflow.com/questions/19795529/python-troubles-controlling-dead-sockets-through-select). Upon receiving the "server terminated" message, we terminate the client.*
 
 *We address Issue 2 by calling python encode('utf-8')/decode('utf-8') on all messages.*
-
-> **Arty: I dumb, pls detail how you addressed Issue 3.** 
 
 ## Wire Protocol
 
@@ -57,8 +46,6 @@ We use Python's `Lib/struct.py` to encode/decode messages efficiently and safely
 The transfer buffer defines the structure of any and all messages exchanged between the client and server. We define the transfer buffer in this project as the union of a *Message Code* and a *Payload*. The first byte of any exchanged message is the *Message Code*, and the remaining bytes are the *Payload*. The *Message Code* has a Format Character of `B`, which maps to a C `unsigned char`. Each *Message Code* maps to a *Message Type*, which is an internal identifier introduced for accessibility and readibilty purposes. For instance, the client program labels its commands via the associated *Message Type* that they broadcast. Message codes `0...5` are requests made by a client to the server, and message codes `6...8` are responses made by the server to a client. Each message code is described in detail below. The *Payload Parameters* are combined sequentially in-order to form the *Payload*.
 
 > **Arty: pls make edits to the wire protocol section as appropriate.** 
-
-> **Arty: do we need to justify inclusion/exclusion of any message codes/functionality?**
 
 ##### Requests 
 
@@ -80,7 +67,6 @@ Message Code: Type | Description | Payload Parameters
 8: `nms` | New chat message. | from_username:`16s`, content:`512s`
 
 #### *February 17th, 2023*
-
 ### Design Spec
 
 Design principles:
@@ -108,7 +94,7 @@ A couple design goals we kept in mind: we want our server to be deterministic, a
 Test commands: 
 start server: python3 server.py ip port
 cd testing_infrastructure
-python3 <test file name> ip port
+python3 {test file name} ip port
 
 ### Issues
 
@@ -126,43 +112,20 @@ Testing revealed the following issues:
 *Issues 4 and 5 fixed via implementation of a message queue, and more rigorous error handling.*
 
 #### *February 19th, 2023*
-
 ### gRPC
-> **One of Swati/Arty: general writeup about gRPC. Pref Arty**
 
-> **Swati: writeup about gRPC implementation. fix delete/message errors.**
+Remote Procedure Calls are a [communication paradigm](https://web.eecs.umich.edu/~mosharaf/Readings/RPC.pdf) operating by sending functions, as opposed to wire protocols, which operate by sending information. We build out basic chat functionality in gRPC as well, following [this](https://melledijkstra.github.io/science/chatting-with-grpc-in-python) github guide, for the purpose of efficiency comparison with our wire protocol.
 
 Command to generate gRPC code from users.proto:
-
 python3 -m grpc_tools.protoc -I./ --python_out=. --pyi_out=. --grpc_python_out=. ./users.proto
 
-Reference this post: https://groups.google.com/g/grpc-io/c/iLHgWC8o8UM/m/2PN4WaA9anMJ
-- lazy authentication (client manually adds a password)
+Key differences between wire protocol and gRPC implementation:
 
-**Swati's crackhead 5am notes:**
-should store on server whether someone has already logged in?
-    that's kind of horrible though...
-ok, so you literally cannot login again to an account
-    you can only delete your own account (your account is stored client side)
-accdump, accfilter unchanged
-message
-I'm just going to mimic my wire protocol functionality exactly with gRPC, then discuss why gRPC lends itself poorly to certain things (ex login, authentication)
-    should also discuss what, if anything, gRPC lends itself well to: file:///Users/swatigoel/Downloads/p39-birrell.pdf
-also note: I guess I've made password functionality on wire protocol, and here, obsolete, but it was easier this way
-    or not entirely, because client might re log in!!
-transmute payload success or payload error functionality!!
-chat functionality via: https://melledijkstra.github.io/science/chatting-with-grpc-in-python
-delete: reasoning: if a client can login to an account (ie has access to an account password), they can delete that account. else, cannot
+gRPC lends itself less naturally well to user authentication. In our system, we have an account automatically add a password to future requests, per discussion [here](https://groups.google.com/g/grpc-io/c/iLHgWC8o8UM/m/2PN4WaA9anMJ).
+
+The system is robust against incorrect usage, but does not have specific error messages as in the wire protocol (ie, is less user friendly). This is a design choice based on the structure of gRPC; verifying that an error was caused specifically by a logged off client, for example, would require the server to manually track logged in/off clients. With more time, we would implement more of user friendliness.
 
 #### *February 20th, 2023*
-
-### Results
-
-> **Swati: add something regarding test cases which still fail (login from m1, for example).**
-
-> **Arty: if you have time to implement any sort of efficiency testing, amazing**
-
-
 ### Discussion
 
 > **One of Swati/Arty: Write a para comparing efficiency of wire protocol and gRPC. Pref Arty.** 

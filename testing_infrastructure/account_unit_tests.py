@@ -44,4 +44,5 @@ def account_unit_tests(ip, port, verbose=False):
 if __name__ == "__main__":
     ip = str(sys.argv[1])
     port = int(sys.argv[2])
-    account_unit_tests(ip, port, True)
+    verbose = bool(sys.argv[3])
+    account_unit_tests(ip, port, verbose)

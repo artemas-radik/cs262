@@ -22,11 +22,10 @@ class Client:
     def run(self, server_addy, comm):
         elements = comm.split(' ')
 
-        response = "somewhere, someone, something fucked up"
+        response = "[FAILURE] Incorrect command usage."
         match elements[0]:
-            case "register": #HOW TO CONSTRICT SIZE OF STRING
+            case "register":
                 response = self.stub.RegisterUser(users_pb2.registerUser(username=elements[1], password=elements[2]))
-                #print(response.reply)
             case "login":
                 self.account = elements[1], elements[2]
                 response = self.stub.LoginUser(users_pb2.loginUser(username=elements[1], password=elements[2]))

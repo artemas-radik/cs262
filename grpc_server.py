@@ -11,13 +11,10 @@ import users_pb2_grpc
 
 accounts = {}
 
-#note: loads full chat history
-#note: only one device / account, but mult accounts / device
-    #second login forces logout
+#loads full chat history
+#second login on a device forces logout
 
 class UserTable(users_pb2_grpc.UserTableServicer):
-    #return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
-
     def __init__(self):
         # List with all the chat history
         self.chats = []
@@ -31,10 +28,11 @@ class UserTable(users_pb2_grpc.UserTableServicer):
     def LoginUser(self, request, context):
         if request.username in accounts.keys():
             if accounts[request.username][0] == request.password:
-                if accounts[request.username][1] != -1:
-                    return users_pb2.requestReply(reply= f"Max 1 device for account: {request.username}.")
+                #if accounts[request.username][1] != -1:
+                #    return users_pb2.requestReply(reply= f"Max 1 device for account: {request.username}.")
                 accounts[request.username][1] = 1
-                dump = '\n'.join([c.m for c in self.chats if c.username==request.username]) #loads full chat history
+                mess = [i for i,c in enumerate(self.chats) if c.username==request.username] #loads full chat history
+                dump = '\n'.join([self.chats[i].m for i in mess])
                 return users_pb2.requestReply(reply= f"Authenticated {request.username}. \n{dump}")
             else: 
                 return users_pb2.requestReply(reply= f"Wrong password.")

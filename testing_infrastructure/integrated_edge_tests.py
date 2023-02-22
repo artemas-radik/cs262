@@ -94,4 +94,5 @@ def integrated_edge_tests(ip, port, verbose=False):
 if __name__ == "__main__":
     ip = str(sys.argv[1])
     port = int(sys.argv[2])
-    integrated_edge_tests(ip, port, True)
+    verbose = bool(sys.argv[3])
+    integrated_edge_tests(ip, port, verbose)
