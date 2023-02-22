@@ -1,0 +1,7 @@
+register a b
+login a b
+register c d
+message c hiii 
+message c heyyy 
+message c whatsuppp  
+login c d

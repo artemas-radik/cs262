@@ -91,7 +91,17 @@ We implement integrated testing in integrated_testing.py. The first test suite i
 
 A couple design goals we kept in mind: we want our server to be deterministic, and our testing to be repeatable. Background research which was especially helpful in informing our infrastructure decisions: [Don't Write Tests](https://www.youtube.com/watch?v=hXnS_Xjwk2Y), and [Testing a Distributed System](https://queue.acm.org/detail.cfm?id=2800697).
 
-Test commands: 
+Test commands (wire protocol): 
+start server: python3 server.py ip port -verbose_flag=False
+cd testing_infrastructure
+python3 {test file name} ip port
+
+Test commands (grpc): 
+start server: python3 grpc_server.py ip port -verbose_flag=False
+cd testing_infrastructure
+python3 {test file name} ip port
+
+Test commands (paddle tests): 
 start server: python3 server.py ip port
 cd testing_infrastructure
 python3 {test file name} ip port

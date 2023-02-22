@@ -12,5 +12,8 @@ deleteacc
 accfilter arty2 
 login arty2 muskaan
 login arty3 muskaan
-deleteacc
+deleteacc arty2 
 accdump 
+login arty3 anna 
+message arty3 hi 
+message arty3 have a nice day
