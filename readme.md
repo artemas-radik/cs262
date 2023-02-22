@@ -92,17 +92,14 @@ We implement integrated testing in integrated_testing.py. The first test suite i
 A couple design goals we kept in mind: we want our server to be deterministic, and our testing to be repeatable. Background research which was especially helpful in informing our infrastructure decisions: [Don't Write Tests](https://www.youtube.com/watch?v=hXnS_Xjwk2Y), and [Testing a Distributed System](https://queue.acm.org/detail.cfm?id=2800697).
 
 Test commands (wire protocol): 
-start server: python3 server.py ip port -verbose_flag=False
+start server: python3 server.py ip port v
+- v = verbose flag, default = False
 cd testing_infrastructure
 python3 {test file name} ip port
 
 Test commands (grpc): 
-start server: python3 grpc_server.py ip port -verbose_flag=False
-cd testing_infrastructure
-python3 {test file name} ip port
-
-Test commands (paddle tests): 
-start server: python3 server.py ip port
+start server: python3 grpc_server.py ip port v
+- v = verbose flag, default = False
 cd testing_infrastructure
 python3 {test file name} ip port
 
@@ -138,10 +135,15 @@ The system is robust against incorrect usage, but does not have specific error m
 #### *February 20th, 2023*
 ### Discussion
 
-> **One of Swati/Arty: Write a para comparing efficiency of wire protocol and gRPC. Pref Arty.** 
+Paddle Test:
 
 Wire Protocol Paddle Test ("yo"):
 Messages Exchanged (30 seconds): 619171
 
 gRPC Paddle Test ("yo"):
 Messages Exchanged (30 seconds): 1246
+
+Wire Protocol Paddle Test ("1111111111111111111111111111111111111111111111111111111111111111"):
+
+
+gRPC Paddle Test ('1111111111111111111111111111111111111111111111111111111111111111'):
