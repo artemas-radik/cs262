@@ -13,7 +13,7 @@ import users_pb2_grpc
 class Client:
 
     def __init__(self, server_addy):
-        self.account = (-1, -1)
+        self.account = [-1, -1]
         self.channel = grpc.insecure_channel(server_addy)
         self.stub = users_pb2_grpc.UserTableStub(self.channel)
         self.chat_list = []
@@ -22,11 +22,10 @@ class Client:
     def run(self, server_addy, comm):
         elements = comm.split(' ')
 
-        response = "somewhere, someone, something fucked up"
+        response = "[FAILURE] Incorrect command usage."
         match elements[0]:
-            case "register": #HOW TO CONSTRICT SIZE OF STRING
+            case "register":
                 response = self.stub.RegisterUser(users_pb2.registerUser(username=elements[1], password=elements[2]))
-                #print(response.reply)
             case "login":
                 self.account = elements[1], elements[2]
                 response = self.stub.LoginUser(users_pb2.loginUser(username=elements[1], password=elements[2]))
@@ -38,10 +37,10 @@ class Client:
                 response = self.stub.FilterUsers(users_pb2.filterUsers(wildcard=elements[1]))
             case "message":
                 if self.account[0] != -1:
-                    response = self.stub.MessageUser(users_pb2.messageUser(username=elements[1], from_user = self.account[0], m = elements[2]))
+                    response = self.stub.MessageUser(users_pb2.messageUser(username=elements[1], from_user = self.account[0], m = ' '.join(elements[2:])))
             case _:
                 print("[FAILURE] Incorrect command usage.")
-        print (response)
+        print(response.reply)
 
     def __listen_for_messages(self): #update conn input here
         """
