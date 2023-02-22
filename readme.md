@@ -130,3 +130,8 @@ The system is robust against incorrect usage, but does not have specific error m
 
 > **One of Swati/Arty: Write a para comparing efficiency of wire protocol and gRPC. Pref Arty.** 
 
+Wire Protocol Paddle Test ("yo"):
+Messages Exchanged (30 seconds): 619171
+
+gRPC Paddle Test ("yo"):
+Messages Exchanged (30 seconds): 1246
