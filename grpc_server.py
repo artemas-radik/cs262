@@ -16,15 +16,19 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         # List with all the chat history
         self.chats = []
 
-    #adds an account, password object to accounts
+    #add key, value pair (username, password) to accounts
+        #throw error if the username is already in accounts
+            #prevents change of password
     def RegisterUser(self, request, context):
         if request.username in accounts.keys():
             return users_pb2.requestReply(reply="Username already registered.")
         accounts[request.username] = request.password
         return users_pb2.requestReply(reply= f"Registered {request.username}.")
 
-    #loads full chat history of a user, at login
-    #authenticates login request (against password stored in accounts)
+    #authenticates login request
+        #request.password must match stored password on server
+    #load full chat history of user, upon login
+        #similar to how FB messenger functions, for example
     def LoginUser(self, request, context):
         if request.username in accounts.keys():
             if accounts[request.username] == request.password:
@@ -33,11 +37,14 @@ class UserTable(users_pb2_grpc.UserTableServicer):
                 dump = '\n'.join([self.chats[i].m for i in mess])
                 return users_pb2.requestReply(reply= f"Authenticated {request.username}. \n{dump}")
             else: 
-                return users_pb2.requestReply(reply= f"Wrong password or username.")
+                return users_pb2.requestReply(reply= f"Wrong password or username.") #can be triggered by both an incorrect password and incorrect username
         else:
             return users_pb2.requestReply(reply= f"Username not found.")
 
-    #removes user from stored accounts
+    #deletes user
+        #removes account with username == request.username from accounts
+        #checks password attached to client request
+            #ensures a client can only delete its own account
     def DeleteUser(self, request, context):
         if request.username in accounts.keys():
             if request.username == request.from_user and accounts[request.username] == request.password:
@@ -49,7 +56,9 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         else:
             return users_pb2.requestReply(reply= f"User not found.")
         
-    #iterates through accounts, returns all stored usernames
+    #return all registered users
+        #iterates through accounts
+        #DeleteUser already handles removal of usernames from accounts
     def DumpUsers(self, request, context):
         if accounts:
             dump = "Users: "
@@ -59,7 +68,9 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         else:
             return users_pb2.requestReply(reply= f"No users found.")
 
-    #iterates through accounts, returns all stored usernames with matching regex
+    #return all registered users, w/ matching regex
+        #iterates through accounts
+        #DeleteUser already handles removal of usernames from accounts
     def FilterUsers(self, request, context):
         if accounts:
             r = re.compile(request.wildcard)
@@ -81,7 +92,7 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         self.chats.append(request)
         return users_pb2.requestReply()
     
-    #broadcasts any messages added to chats to all clients
+    #yields every message added to chats
     def SubscribeMessages(self, request_iterator, context):
         lastindex = 0
         # For every client a infinite loop starts (in gRPC's own managed thread)

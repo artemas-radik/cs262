@@ -68,7 +68,9 @@ class Client:
         else:
             return(response)
 
-    def __listen_for_messages(self): #update conn input here
+    #listen for messages from server
+        #continuously running SubscribeMessages()
+    def __listen_for_messages(self):
         """
         This method will be ran in a separate thread as the main/ui thread, because the for-in call is blocking
         when waiting for new messages

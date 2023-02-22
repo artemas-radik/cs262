@@ -16,7 +16,7 @@ if __name__ == "__main__":
         for socks in read_sockets:
             if socks == server:
                 m = socks.recv(4096).decode("utf-8")
-                if (m == ''): #CHANGE THIS SOLUTION/TEST FAIL POINTS
+                if (m == ''):
                     break
                 message = print(m)
             else:
