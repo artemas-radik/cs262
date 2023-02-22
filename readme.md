@@ -48,14 +48,26 @@ There is also our gRPC implementation of the server, which is started similarly.
 python3.10 grpc_server.py 52.152.216.212 5001
 ```
 ### Tests
-We have built test suites for 
+We have built test files for several test cases. These are located in the `testing_infrastructure` directory. To run the tests, start by locally running the server. Remember to use your own IP.
+```bash
+python3.10 server.py 10.250.113.127 5000
+```
+Similarly for the gRPC tests a gRPC server is needed.
+```bash
+python3.10 grpc_server.py 10.250.113.127 5001
+```
+Now `cd` into `testing_infrastrcutre` and run any of the tests, replacing `account_unit_tests.py` with your desired test .
+```bash
+python3 account_unit_tests.py 52.152.216.212 5000 False
+```
+A full list of ten tests is given in the `testing_infrastructure` directory.
 
-
-
-
+# Wire Protocol
+The wire protocol follows very closely to the table in the "Usage" seciton above. We use a string based transfer buffer. The first part of the transfer buffer is the command (opcode). For instance, `message` or `deleteacc`. If any parameters are necessary for a given command, we append them to transfer buffer, and ensure that all components of the transfer buffer are seperated by spaces. The only command that allows for a parameter to include spaces is `message`. For `message`, anything after the first parameter gets interpreted as part of the second parameter, so the second parameter is allowed to have spaces (message contents). All strings are `utf-8` encoded. The maximum allowed transfer buffer size is 4096 bytes.
 
 # Engineering Notebook
-#### *February 7th, 2023*
+*Note that these our our notes as we built this project and not documentation.*
+### Start of Project
 We started the project today by following a guide for a similar project available [here](https://www.geeksforgeeks.org/simple-chat-room-using-python/) . Our goal for the moment is to acheive what the guide claims to acheive: a simple client-server chat program, where simple text messages can be sent to the server by clients and then rebroadcasted to every other client. Unfortunately the code provided by the guide does not work out-of-the-box and has the following issues:
 1. Clients enter infinite loop state after server terminates.
 2. Bytes not properly encoded/decoded to `utf-8` on both client and server side.
@@ -65,7 +77,7 @@ We started the project today by following a guide for a similar project availabl
 
 *We address Issue 2 by calling python encode('utf-8')/decode('utf-8') on all messages.*
 
-## Wire Protocol
+## Original Wire Protocol Idea
 
 We use Python's `Lib/struct.py` to encode/decode messages efficiently and safely between our client and server. 
 
@@ -78,8 +90,6 @@ We use Python's `Lib/struct.py` to encode/decode messages efficiently and safely
 ### Transfer Buffer
 
 The transfer buffer defines the structure of any and all messages exchanged between the client and server. We define the transfer buffer in this project as the union of a *Message Code* and a *Payload*. The first byte of any exchanged message is the *Message Code*, and the remaining bytes are the *Payload*. The *Message Code* has a Format Character of `B`, which maps to a C `unsigned char`. Each *Message Code* maps to a *Message Type*, which is an internal identifier introduced for accessibility and readibilty purposes. For instance, the client program labels its commands via the associated *Message Type* that they broadcast. Message codes `0...5` are requests made by a client to the server, and message codes `6...8` are responses made by the server to a client. Each message code is described in detail below. The *Payload Parameters* are combined sequentially in-order to form the *Payload*.
-
-> **Arty: pls make edits to the wire protocol section as appropriate.** 
 
 ##### Requests 
 
@@ -152,7 +162,6 @@ Testing revealed the following issues:
 
 *Issues 4 and 5 fixed via implementation of a message queue, and more rigorous error handling.*
 
-#### *February 19th, 2023*
 ### gRPC
 
 Remote Procedure Calls are a [communication paradigm](https://web.eecs.umich.edu/~mosharaf/Readings/RPC.pdf) operating by sending functions, as opposed to wire protocols, which operate by sending information. We build out basic chat functionality in gRPC as well, following [this](https://melledijkstra.github.io/science/chatting-with-grpc-in-python) github guide, for the purpose of efficiency comparison with our wire protocol.
