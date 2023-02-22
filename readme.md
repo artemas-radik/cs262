@@ -1,6 +1,5 @@
 
 ## TODOS:
-- implement client identification on gRPC, to fix deletion and messaging -- NOW DONE!!!
 - decide how we're packaging this for demo day
 - comment the code
 - (smaller todos are listed throughout this document. but truly, we could just ignore them. depends on how much time we have)
@@ -26,7 +25,9 @@ python3 client.py 10.250.243.199 5000
  
 > **One of Swati/Arty: check assignment spec against current engineering notebook & code.**
 
-> **Swati: comment the code, in a reasonable timeframe so Arty can iterate, if desired.**
+> **Swati: comment the grpc and testing code.
+
+> **Arty: comment the wire protocol code.**
 
 # Engineering Notebook
 #### *February 7th, 2023*
@@ -98,13 +99,16 @@ To uphold these principles, we:
 
 ### Testing Infrastructure
 
->**split into 5 files, have one master file run the 5 tests**
-
 We build unit tests following the principles outlined by [Nathan Peck](https://medium.com/@nathankpeck/microservice-testing-unit-tests-d795194fe14e), via Medium. The goal of unit testing is to isolate/test specific functionality in a single network component. We implement unit testing in server_unit_tests.py. The first test suite is for account management functionality. We compare expected results against generated results, for a manually designed set of commands. The second test suite is for simple message functionality (processing & error handling), again via a manually designed set of commands. 
 
 We implement integrated testing in integrated_testing.py. The first test suite is for robustness against redundant or illogical commands. Runs a set of randomly generated commands from a single client. The second test suite is manually designed integrated testing, for all functionality over multiple clients. This is where most of the rigorous edge case testing takes place. The third test suite is once again for robustness, over a set of randomly generated commands, this time with multiple clients. 
 
 A couple design goals we kept in mind: we want our server to be deterministic, and our testing to be repeatable. Background research which was especially helpful in informing our infrastructure decisions: [Don't Write Tests](https://www.youtube.com/watch?v=hXnS_Xjwk2Y), and [Testing a Distributed System](https://queue.acm.org/detail.cfm?id=2800697).
+
+Test commands: 
+start server: python3 server.py ip port
+cd testing_infrastructure
+python3 <test file name> ip port
 
 ### Issues
 
@@ -114,10 +118,6 @@ Testing revealed the following issues:
 3. No confirmation message sent on successful deleteacc
 4. Messages dropped if account logs off, logs back on
 5. Error statements for failed message delivery do not accurately descibe the error
-
-> **Arty: feel free to weigh in on/change my message queue**
-
-> **Open Issue: Client does not disconnect when Server crashes.****
 
 *We address Issue 1 by disallowing multiple accounts per client. We address Issue 2 by disallowing multiple clients per account.*
 
