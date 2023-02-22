@@ -1,0 +1,7 @@
+Registered a.
+Authenticated a. 
+Registered c.
+
+[FAILURE] Incorrect command usage.
+
+Authenticated c.  hiii whatsuppp

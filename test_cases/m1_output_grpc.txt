@@ -2,15 +2,18 @@ Registered arty.
 Registered arty2.
 Registered arty3.
 Username already registered.
-Wrong password.
+Wrong password or username.
 Authenticated arty.
 Users:  arty, arty2, arty3.
-Deleted.
+Account Deleted.
 [FAILURE] Incorrect command usage.
 Users:  arty2, arty3.
 [FAILURE] Incorrect command usage.
-Users: arty2.
+Matching Users: arty2.
 Authenticated arty2.
-[FAILURE] Incorrect command usage.
-Account deleted.
-Users: arty3.
+Wrong password or username.
+Account Deleted.
+Users:  arty3.
+Authenticated arty3.
+<arty3> hi
+<arty3> have a nice day 

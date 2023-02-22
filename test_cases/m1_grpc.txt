@@ -5,12 +5,15 @@ register arty3 muskaan
 login arty naomi
 login arty muskaan
 accdump 
-deleteacc arty 
+deleteacc  
 deleteacc
 accdump 
 deleteacc 
 accfilter arty2 
 login arty2 muskaan
 login arty3 muskaan
-deleteacc
+deleteacc  
 accdump 
+login arty3 anna 
+message arty3 hi 
+message arty3 have a nice day

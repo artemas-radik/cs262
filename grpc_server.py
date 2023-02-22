@@ -22,24 +22,24 @@ class UserTable(users_pb2_grpc.UserTableServicer):
     def RegisterUser(self, request, context):
         if request.username in accounts.keys():
             return users_pb2.requestReply(reply="Username already registered.")
-        accounts[request.username] = [request.password, -1]
+        accounts[request.username] = request.password
         return users_pb2.requestReply(reply= f"Registered {request.username}.")
 
     def LoginUser(self, request, context):
         if request.username in accounts.keys():
-            if accounts[request.username][0] == request.password:
-                accounts[request.username][1] = 1
+            if accounts[request.username] == request.password:
+                #accounts[request.username][1] = 1
                 mess = [i for i,c in enumerate(self.chats) if c.username==request.username] #loads full chat history
                 dump = '\n'.join([self.chats[i].m for i in mess])
                 return users_pb2.requestReply(reply= f"Authenticated {request.username}. \n{dump}")
             else: 
-                return users_pb2.requestReply(reply= f"Wrong password.")
+                return users_pb2.requestReply(reply= f"Wrong password or username.")
         else:
             return users_pb2.requestReply(reply= f"Username not found.")
 
     def DeleteUser(self, request, context):
         if request.username in accounts.keys():
-            if request.username == request.from_user and accounts[request.username][0] == request.password:
+            if request.username == request.from_user and accounts[request.username] == request.password:
                 #simple auth
                 del accounts[request.username]
                 return users_pb2.requestReply(reply= f"Account Deleted.")
