@@ -1,8 +1,19 @@
 
-# Getting Started
-*Tested on MacOS Ventura 13.2 with Python 3.9.6 Installed*
+# Quickstart
+To make demo day convenient, we have precompiled our client for unix-based systems and defaulted it to connecting to a prehosted version of our server running on Azure cloud.
+### Unix-Based Systems (MacOS, Linux)
+Make sure you are in the root `cs262` directory. Run the precompiled binary with the following command:
+```bash
+./dist/client/client
+```
 
-Replace cases of `10.250.243.199` with your private IP address, obtained by running `s5` on wireless networks and `ipconfig getifaddr en1` on wired networks.
+### Windows
+
+
+
+
+
+Replace cases of `10.250.243.199` with your private IP address, obtained by running `ipconfig getifaddr en0` on wireless networks and `ipconfig getifaddr en1` on wired networks.
 
 ### Server
 ```bash
