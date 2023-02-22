@@ -11,20 +11,20 @@ import users_pb2_grpc
 
 accounts = {}
 
-#loads full chat history
-#second login on a device forces logout
-
 class UserTable(users_pb2_grpc.UserTableServicer):
     def __init__(self):
         # List with all the chat history
         self.chats = []
 
+    #adds an account, password object to accounts
     def RegisterUser(self, request, context):
         if request.username in accounts.keys():
             return users_pb2.requestReply(reply="Username already registered.")
         accounts[request.username] = request.password
         return users_pb2.requestReply(reply= f"Registered {request.username}.")
 
+    #loads full chat history of a user, at login
+    #authenticates login request (against password stored in accounts)
     def LoginUser(self, request, context):
         if request.username in accounts.keys():
             if accounts[request.username] == request.password:
@@ -37,6 +37,7 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         else:
             return users_pb2.requestReply(reply= f"Username not found.")
 
+    #removes user from stored accounts
     def DeleteUser(self, request, context):
         if request.username in accounts.keys():
             if request.username == request.from_user and accounts[request.username] == request.password:
@@ -48,6 +49,7 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         else:
             return users_pb2.requestReply(reply= f"User not found.")
         
+    #iterates through accounts, returns all stored usernames
     def DumpUsers(self, request, context):
         if accounts:
             dump = "Users: "
@@ -57,6 +59,7 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         else:
             return users_pb2.requestReply(reply= f"No users found.")
 
+    #iterates through accounts, returns all stored usernames with matching regex
     def FilterUsers(self, request, context):
         if accounts:
             r = re.compile(request.wildcard)
@@ -69,6 +72,7 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         else: 
             return users_pb2.requestReply(reply= f"No accounts found.")
     
+    #appends messages to self.chats (triggers action by SubscribeMessages)
     def MessageUser(self, request, context):
         #logged_in = False
         #uname = "Guest"
@@ -77,6 +81,7 @@ class UserTable(users_pb2_grpc.UserTableServicer):
         self.chats.append(request)
         return users_pb2.requestReply()
     
+    #broadcasts any messages added to chats to all clients
     def SubscribeMessages(self, request_iterator, context):
         lastindex = 0
         # For every client a infinite loop starts (in gRPC's own managed thread)
@@ -97,7 +102,7 @@ def serve(ip, port):
     print("Server started, listening on " + port)
     server.wait_for_termination()
 
-
+#initialize server
 if __name__ == '__main__':
     logging.basicConfig()
     try: 

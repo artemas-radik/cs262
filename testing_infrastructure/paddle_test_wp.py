@@ -3,6 +3,8 @@ import sys
 import time
 import socket
 import select
+import string
+import random
 sys.path.insert(1, '../')
 sys.path.insert(1, '../test_cases/')
 
@@ -15,6 +17,7 @@ def paddle_tests(ip, port, verbose=False):
     n = 30
     t_end = time.time() + n
     i = 0
+    avg_size = 0
     while time.time() < t_end:
         sockets_list = [sys.stdin, server]
         read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
@@ -26,11 +29,15 @@ def paddle_tests(ip, port, verbose=False):
                 if (i == 1):
                     server.send("login a b".encode('utf-8'))
                 elif (i > 1):
-                    server.send("message a 1".encode('utf-8'))
+                    letters = string.ascii_lowercase 
+                    x = int(random.random()*4096)
+                    sub_str = ''.join(random.choice(letters) for j in range(x))
+                    server.send(f"message a {sub_str}".encode('utf-8'))
+                    avg_size += sys.getsizeof(f"message a {sub_str}".encode('utf-8'))
                 i += 1
             else:
                 pass
-    print(f"Messages Exchanged ({n} seconds): {i}")
+    print(f"Messages Exchanged ({n} seconds), Avg Buffer Size: {i}, {int(avg_size/(i-1))}")
 
 if __name__ == "__main__":
     ip = str(sys.argv[1])
