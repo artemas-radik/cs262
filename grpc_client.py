@@ -13,7 +13,7 @@ import users_pb2_grpc
 class Client:
 
     def __init__(self, server_addy):
-        self.account = (-1, -1)
+        self.account = [-1, -1]
         self.channel = grpc.insecure_channel(server_addy)
         self.stub = users_pb2_grpc.UserTableStub(self.channel)
         self.chat_list = []

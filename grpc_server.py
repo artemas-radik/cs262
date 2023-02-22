@@ -11,10 +11,9 @@ import users_pb2_grpc
 
 accounts = {}
 
-"""
-Soft TODO:
-restrict to single login / server and/or single server / account
-"""
+#note: loads full chat history
+#note: only one device / account, but mult accounts / device
+    #second login forces logout
 
 class UserTable(users_pb2_grpc.UserTableServicer):
     #return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
@@ -26,13 +25,16 @@ class UserTable(users_pb2_grpc.UserTableServicer):
     def RegisterUser(self, request, context):
         if request.username in accounts.keys():
             return users_pb2.requestReply(reply="Username already registered.")
-        accounts[request.username] = request.password
+        accounts[request.username] = [request.password, -1]
         return users_pb2.requestReply(reply= f"Registered {request.username}.")
 
     def LoginUser(self, request, context):
         if request.username in accounts.keys():
-            if accounts[request.username] == request.password:
-                dump = '\n'.join([c.m for c in self.chats if c.username==request.username])
+            if accounts[request.username][0] == request.password:
+                if accounts[request.username][1] != -1:
+                    return users_pb2.requestReply(reply= f"Max 1 device for account: {request.username}.")
+                accounts[request.username][1] = 1
+                dump = '\n'.join([c.m for c in self.chats if c.username==request.username]) #loads full chat history
                 return users_pb2.requestReply(reply= f"Authenticated {request.username}. \n{dump}")
             else: 
                 return users_pb2.requestReply(reply= f"Wrong password.")
@@ -41,7 +43,7 @@ class UserTable(users_pb2_grpc.UserTableServicer):
 
     def DeleteUser(self, request, context):
         if request.username in accounts.keys():
-            if request.username == request.from_user and accounts[request.username] == request.password:
+            if request.username == request.from_user and accounts[request.username][0] == request.password:
                 #simple auth
                 del accounts[request.username]
                 return users_pb2.requestReply(reply= f"Account Deleted.")
