@@ -3,6 +3,8 @@ sys.path.insert(1, '../')
 sys.path.insert(1, '../test_cases/')
 import socket
 import select
+import string
+import random
 #from client import encode, decode
 #from client_unit_tests import randomized_commands
 
