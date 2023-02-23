@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2022)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: JOCN-Template.aux
+The style file: osajnl.bst
+Database file #1: sample.bib
+You've used 2 entries,
+            2613 wiz_defined-function locations,
+            604 strings with 4553 characters,
+and the built_in function-call counts, 894 in all, are:
+= -- 63
+> -- 28
+< -- 1
++ -- 10
+- -- 8
+* -- 60
+:= -- 101
+add.period$ -- 5
+call.type$ -- 2
+change.case$ -- 2
+chr.to.int$ -- 0
+cite$ -- 2
+duplicate$ -- 89
+empty$ -- 88
+format.name$ -- 10
+if$ -- 204
+int.to.chr$ -- 0
+int.to.str$ -- 2
+missing$ -- 21
+newline$ -- 10
+num.names$ -- 2
+pop$ -- 32
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 25
+stack$ -- 0
+substring$ -- 38
+swap$ -- 60
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 5
+width$ -- 3
+write$ -- 21

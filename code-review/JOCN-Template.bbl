@@ -1,0 +1,14 @@
+\begin{thebibliography}{1}
+\newcommand{\enquote}[1]{``#1''}
+
+\bibitem{Chitimalla:17}
+D.~Chitimalla, K.~Kondepu, L.~Valcarenghi, M.~Tornatore, and B.~Mukherjee,
+  \enquote{5g fronthaul--latency and jitter studies of cpri over ethernet,}
+  {\protect\JournalTitle{J. Opt. Commun. Netw.}} \textbf{9}, 172--182 (2017).
+
+\bibitem{Wen:16}
+Y.-H. Wen, J.-W. Ho, and K.-M. Feng, \enquote{Simultaneous all-optical
+  transparent phase multiplexing/de-multiplexing based on fwm in a hnlf,} in
+  \emph{Optical Fiber Communication Conference,}  (Optica, 2022), p. W4D.1.
+
+\end{thebibliography}
