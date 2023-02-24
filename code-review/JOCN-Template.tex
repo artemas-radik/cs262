@@ -168,7 +168,7 @@ Welcome to Messenger! Please login or create an account:
 \end{lstlisting}
 
 \noindent Thankfully, the gRPC submission command structure follows extremely closely to the non-gRPC one. The only distinction is that no prompt is required to
-automatically deliver queued messages on the gRPC implementation. We ran similarly extensive testing on the gRPC implementation and verify that all functionaity is present, but have omitted those tests from this report as they repeat much of what is already present.
+automatically deliver queued messages on the gRPC implementation. We ran similarly extensive testing on the gRPC implementation and verify that all functionaity is present, but have omitted those tests from this report as they repeat much of what is already present. 
 
 %Example with the corresponding author designated by an asterisk:
 
@@ -202,7 +202,27 @@ Artemas: Write some on non-gRPC code Rationality, Correctness, Clarity.
 
 \bigskip
 
-\noindent Swati: Write some on gRPC code Rationality, Correctness, Clarity.
+\noindent 
+
+On rationality: Very well thought out design. A lot of effort went into making the code safe, for example limiting message size: 
+
+\begin{lstlisting}[caption={Account Creation Test}]
+  # check length requirements
+  if len(request.message) > 250 or len(request.receiver) > 50 or len(request.sender) > 50:
+    res.status = -1
+    return res
+\end{lstlisting}
+
+Python dictionaries are concurrency safe. But the project goes above and beyond in handling concurrent requests. If there is extra credit, would flag this project as a contender. 
+
+One note: the design could better leverage the inherent structure of gRPC. The strength of gRPC is the ability to call functions/specify operations on a remote server. Fully leveraging this functionality would simplify the code, by removing some of the work being done on the server. For example, this would make multithreading on the server unnecessary.
+
+On correctness: Create Account and Login functionality are tied together (ie creating an account automatically triggers login). Our implementation was different, but I think theirs is a better design choice. Attempting to list 0 users from the List Account function sometimes fails, but this is fine, because providing more information than asked for isn't problematic. Everything else works as specified. 
+
+On clarity: The provided documentation was comprehensive. The command structure was intuitive. An example of a great explanation:
+
+\textit{To ensure thread safety, we have a lock for every global item, and upon every read or write to that item, we acquire the specific lock until our reads of write are complete for any given thread.} 
+
 
 \begin{lstlisting}[language=python,caption={use code samples like this}]
 def match(query):
