@@ -1,23 +1,26 @@
 \documentclass[9pt,twocolumn,twoside]{osajnl}
-
+\usepackage{hyperref}
 \journal{jocn} 
+\usepackage{xcolor}
+\usepackage{listings}
+\lstset{
+  basicstyle=\fontfamily{lmvtt}\selectfont\small\color{blue},
+  columns=fullflexible,
+}
+
 
 % Set the article type for journal submissions. Comment out this line for Optica Open preprint submissions.
-\setboolean{shortarticle}{false}
+\setboolean{shortarticle}{true}
 % true = letter / tutorial
 % false = research / review article
 
-\title{\LaTeX\  template for preparing a research article for submission to the \emph{Journal of Optical Communications and Networking}}
+\title{ Demo Day 1 Code Review: Aayush Karan \& Michael Hla }
 
-\author[1,2,3]{Author One}
-\author[2,*]{Author Two}
-\author[1]{Author Three}
+\author[1]{Artemas Radik}
+\author[2]{Swati Goel}
 
-\affil[1]{Publications Department, Optica Publishing Group, 2010 Massachusetts Avenue NW, Washington DC, 20036, USA}
-\affil[2]{School of Science, University of Technology, 2000 J St. NW, Washington DC, 20036, USA}
-\affil[3]{School of Optics, University of Technology, 2000 J St. NW, Washington DC, 20036, USA}
-
-\affil[*]{email@my-email.com}
+\affil[1]{Harvard College, A.B./S.M. Computer Science \& Statistcs, artemas@college.harvard.edu}
+\affil[2]{Harvard College, A.B. Computer Science \& Physics, sgoel@college.harvard.edu}
 
 %% To be edited by editor
 % \dates{Compiled \today}
@@ -34,15 +37,138 @@ JOCN article style and format is being updated to conform to Optica journal styl
 \begin{document}
 
 \maketitle
-
 \section{Introduction}
-This  template is designed to assist with creating an article to submit to the \emph{Journal of Optical Communications and Networking}. See the \href{https://opg.optica.org/submit/templates/}{Style Guide} and \href{https://www.opg.optica.org/submit/templates/}{Manuscript Templates} pages for more details.
+This code review was conducted on commit \texttt{573fc69} of the repository submitted to us by Aayush and Michael, available \href{https://github.com/akaran1729/CS_262_Wire_Protocol}{publicly on GitHub}. Aayush and Michael are reachable via email at \texttt{karan@college.harvard.edu} and \texttt{michaelhla@college.harvard.edu}, respectively. The code review aims to answer the following questions with regards to the submission:
 
-If you have a question while using this template on {Overleaf}, please use the help menu (``?'') on the top bar to search for help or ask us a question using our \href{https://www.overleaf.com/contact}{contact form}.
+\begin{enumerate}
+  \item Does it function as specified?
+  \item Is the code rational, correct, and clear?
+  \item Is the code and installation documentation adequate?
+\end{enumerate}
 
-\section{Corresponding author}
+\section{Functionality}
 
-We require manuscripts to identify a single corresponding author. The corresponding author typically is the person who submits the manuscript and handles correspondence throughout the peer review and publication process. If other statements about author contribution and contact are needed, they can be added in addition to the corresponding author designation.
+We tested both the gRPC and non-GRPC versions of the program for the following functionaity.
+\begin{enumerate}
+  \item Creating an account with a unique username.
+  \item List all accounts or a subset of the accounts by text wildcard.
+  \item Send a message to a recipient. If the recipient is logged in, deliver immediately; otherwise queue the message and deliver on demand. If the message is sent to someone who isn't a user, return an error message.
+  \item Deliver undelivered messages to a particular user.
+  \item Delete an account. You will need to specify the semantics of what happens if you attempt to delete an account that contains undelivered message.
+\end{enumerate}
+
+\medskip
+
+\noindent \textbf{Testing}
+
+\medskip
+
+\noindent We began by following the provided installation instructions in the engineering notebook, starting the non-gRPC server via \texttt{python3 socket\_server.py 10.250.113.127 5000}. Our first test involved creating an account with the client as seen below.
+
+\begin{lstlisting}[caption={Account Creation Test}]
+python3 socket_client.py 10.250.113.127 5000
+Welcome to Messenger! Please login or create an account:
+Create Account
+a
+Account created. Welcome a!
+\end{lstlisting}
+
+\noindent We wanted to ensure that unique usernames were enforced, so we spawned another client and tried to create another account with the existing username.
+
+\begin{lstlisting}[caption={Unique Username Test}]
+python3 socket_client.py 10.250.113.127 5000
+Welcome to Messenger! Please login or create an account:
+Create Account
+a
+The account a already exists. Please try again.
+\end{lstlisting}
+
+\noindent We were satisfied with these two tests as evidence of account functionaity, so we began testing the username listing feature. As a prerequisite, we created additional accounts with usernames \texttt{blueberry}, \texttt{cranberry} and \texttt{elderberry}. Per the engineering notebook, the username listing feature follows Python RegEx. Thus we began by listing usernames following the \texttt{.*} expression, which we expected to return all usernames. We then listed usernamed following the \texttt{\textasciicircum.*berry.*\$} expression, expecting the last three usernames. We were highly impressed with the RegEx matching functionaity.
+
+\begin{lstlisting}[caption={Account List and Filter Test}]
+python3 socket_client.py 10.250.113.127 5000
+Welcome to Messenger! Please login or create an account:
+List Accounts
+.*
+Users matching .*:
+a blueberry cranberry elderberry 
+List Accounts
+^.*berry.*$
+Users matching ^.*berry.*$:
+blueberry cranberry elderberry
+\end{lstlisting}
+
+\noindent The next test involved sending a message from the logged in \texttt{blueberry} client to the logged in \texttt{cranberry} client.
+
+\begin{lstlisting}[caption={Send Live Message Test}]
+python3 socket_client.py 10.250.113.127 5000
+Welcome to Messenger! Please login or create an account:
+Create Account
+blueberry
+Account created. Welcome blueberry!
+Send
+To: 
+cranberry
+Message: 
+hello there, cranberry.
+
+Message successfully sent.
+\end{lstlisting}
+
+\noindent The \texttt{cranberry} client successfully received the message.
+
+\begin{lstlisting}[caption={Receive Live Message Test}]
+python3 socket_client.py 10.250.113.127 5000
+Welcome to Messenger! Please login or create an account:
+Create Account
+cranberry
+Account created. Welcome cranberry!
+<blueberry>: hello there, cranberry.
+\end{lstlisting}
+
+\noindent Next we logged out \texttt{blueberry} and sent an outbound message from \texttt{cranberry}. Upon re-logging in \texttt{blueberry} we requested our undelivered messages via \texttt{Open Undelivered Messages} as described in the engineering notebook.
+
+\begin{lstlisting}[caption={Receive Undelivered Message Test}]
+python3 socket_client.py 10.250.113.127 5000
+Welcome to Messenger! Please login or create an account:
+Login 
+blueberry
+Welcome back blueberry!
+Open Undelivered Messages
+<cranberry>: Hi, blueberry!
+\end{lstlisting}
+
+\noindent The blueberry client successfully received the undelivered message. Sending a message to a non-existent user also correctly returns an error as seen below.
+
+\begin{lstlisting}[caption={Send Message to Nonexistent User Test}]
+python3 socket_client.py 10.250.113.127 5000
+Welcome to Messenger! Please login or create an account:
+Login
+blueberry
+Welcome back blueberry!
+Send
+To: 
+gooseberry
+Message: 
+do you exist?
+Sorry, message recipient not found. Please try again. 
+\end{lstlisting}
+
+\noindent The last remaining functionaity we tested for was deletion, as seen below on the \texttt{blueberry} account.
+
+\begin{lstlisting}[caption={Account Deletion Test}]
+python3 socket_client.py 10.250.113.127 5000
+Welcome to Messenger! Please login or create an account:
+Login
+blueberry
+Welcome back blueberry!
+Delete Account
+Account blueberry successfully deleted. 
+Welcome to Messenger! Please login or create an account:
+\end{lstlisting}
+
+\noindent Thankfully, the gRPC submission command structure follows extremely closely to the non-gRPC one. The only distinction is that no prompt is required to
+automatically deliver queued messages on the gRPC implementation. We ran similarly extensive testing on the gRPC implementation and verify that all functionaity is present, but have omitted those tests from this report as they repeat much of what is already present.
 
 %Example with the corresponding author designated by an asterisk:
 
@@ -70,12 +196,12 @@ We require manuscripts to identify a single corresponding author. The correspond
 % \section{Examples of Article Components}
 % \label{sec:examples}
 
-\section{Examples of Article Components}
+\section{Code Rationality, Correctness, and Clarity}
 \label{sec:examples}
 
-The sections below show examples of different article components.
+TBD!
 
-\section{Figures and Tables}
+\section{Documentation}
 
 It is not necessary to place figures and tables at the back of the manuscript. Figures and tables should be sized as they are to appear in the final article. Do not include a separate list of figure captions and table titles.
 
@@ -85,12 +211,12 @@ Figures and Tables should be labelled and referenced in the standard way using t
 
 Figure \ref{fig:falsecolor} shows an example figure.
 
-\begin{figure}[htbp]
-\centering
-\fbox{\includegraphics[width=.8\linewidth]{sample}}
-\caption{False-color image, where each pixel is assigned to one of seven reference spectra.}
-\label{fig:falsecolor}
-\end{figure}
+% \begin{figure}[htbp]
+% \centering
+% \fbox{\includegraphics[width=.8\linewidth]{sample}}
+% \caption{False-color image, where each pixel is assigned to one of seven reference spectra.}
+% \label{fig:falsecolor}
+% \end{figure}
 
 \subsection{Author Photographs}
 Author photographs. The final printed size of an author photograph is exactly 1 inch wide by 1 1/4 inches long (6 picas × 7 1/2 picas). Please ensure that the author photographs you submit are proportioned similarly.
@@ -176,7 +302,7 @@ Full references (to aid the editor and reviewers) must be included. This will be
 \noindent Add citations manually or use BibTeX. See \cite{Chitimalla:17,Wen:16}.
 
 % Bibliography
-\bibliography{sample}
+% \bibliography{sample}
 
 % Manual citation list
 % \begin{thebibliography}{1}
@@ -196,12 +322,6 @@ Full references (to aid the editor and reviewers) must be included. This will be
 
 \setlength\intextsep{0pt}
 
-\begin{wrapfigure}{L}{0.21\textwidth}
-\includegraphics[width=0.20\textwidth]{johnsmith}
-\end{wrapfigure}
-
-\medskip
-
 \noindent \textbf{First A. Author} (M’76–SM’81–F’87) and the other authors may include biographies at the end of regular papers. This author became a Member (M) of IEEE in 1976, a Senior Member (SM) in 1981, and a Fellow (F) in 1987. The first paragraph may contain a place and/or date of birth (list place, then date). Next, the author’s educational background is listed. The degrees should be listed with type of degree in what field, which institution, city, state, and country, and year degree was earned. The author’s major field of study should be lower-cased.
   
 The second paragraph uses the pronoun of the person (he or she) and not the author’s last name. It lists military and work experience, including summer and fellowship jobs. Job titles are capitalized. The current job must have a location; previous positions may be listed without one. Information concerning previous publications may be included. Try not to list more than three books or published articles. The format for listing publishers of a book within the biography is: title of book (city, state: publisher name, year) similar to a reference. Current and previous research interests end the paragraph.
@@ -210,9 +330,6 @@ The third paragraph begins with the author’s title and last name (e.g., Dr. Sm
 
 \medskip
 
-  \begin{wrapfigure}{L}{0.21\textwidth}
-     \includegraphics[width=0.2\textwidth]{alicesmith}
-   \end{wrapfigure}
    \noindent
    \textbf{Alice Smith} received her BSc (Mathematics) in 2000 from The University of Maryland. Her research interests also include lasers and optics.
   

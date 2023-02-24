@@ -237,7 +237,7 @@ THE ABSTRACT\vskip12pt}\let\go\relax\fi
 } %% END if ocis codes not provided
 \noindent
 \parbox{\dimexpr\linewidth}{%
-\@doi%
+% \@doi%
 }%
 \hfil\rule{\linewidth}{.4pt}
 }
