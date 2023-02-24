@@ -206,7 +206,7 @@ Artemas: Write some on non-gRPC code Rationality, Correctness, Clarity.
 
 On rationality: Very well thought out design. A lot of effort went into making the code safe, for example limiting message size: 
 
-\begin{lstlisting}[caption={Account Creation Test}]
+\begin{lstlisting}[language=python,caption={code safety code sample}]
   # check length requirements
   if len(request.message) > 250 or len(request.receiver) > 50 or len(request.sender) > 50:
     res.status = -1
