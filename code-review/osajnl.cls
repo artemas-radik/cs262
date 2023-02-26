@@ -220,12 +220,12 @@ THE ABSTRACT\vskip12pt}\let\go\relax\fi
 % Define a new environment with abstract content and styling
 % (to enable switching between long and short articles)
 \newcommand{\abscontent}{
-\noindent
+% \noindent
 {%
-\parbox{\dimexpr\linewidth}{%
-	\absfont \theabstract
-    \copyrightfont \ifthenelse{\boolean{displaycopyright}}{\copyrightstatement}{}
-}%
+% \parbox{\dimexpr\linewidth}{%
+% 	\absfont \theabstract
+%     \copyrightfont \ifthenelse{\boolean{displaycopyright}}{\copyrightstatement}{}
+% }%
 }%
 \vskip8pt%
 \ifdefempty{\@ociscodes}{}{%
@@ -268,9 +268,9 @@ THE ABSTRACT\vskip12pt}\let\go\relax\fi
 \vskip12pt}}
 {% else display the abstract contents (in reduced width box)
 {%
-\abscontentformatted
+% \abscontentformatted
 }%
-\vskip25pt%
+% \vskip25pt%
 }%
 }%
 }%

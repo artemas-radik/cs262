@@ -198,50 +198,62 @@ automatically deliver queued messages on the gRPC implementation. We ran similar
 
 \section{Code Rationality, Correctness, and Clarity}
 \label{sec:examples}
-Artemas: Write some on non-gRPC code Rationality, Correctness, Clarity.
+\noindent \textbf{Non-gRPC Implementation}
 
-\bigskip
+\smallskip
+
+\noindent Design is well-thought out and code is reasonably structured and organized. The code goes a long way to acheive correctness, implementing threading locks, timeouts, and several error-catching if statements. For instance, the server implements an authentication scheme through the use of a \texttt{logged\_in} variable. Certain client-facing features are available only once this variable has been toggled, while other client-facing features are available to only unauthenticated users.
+
+\medskip
+
+\noindent Furthermore, significant error-checking also occurs client-side. For instance, even though the server wouldn't allow a logged in user to log in as somebody else, the client program also checks for this state before asking the server to perform a log in. This could offer performance benefits at scale by shifting much of the processing from the server to the clients.
+
+\medskip
+
+\noindent Many edge cases are also accounted for. For instance, the server properly handles situations where a client 
+\begin{enumerate}
+  \item Terminates process via CTRL-C.
+  \item Trys to login in two locations simultaneously.
+  \item Sends a malformed input.
+\end{enumerate}
+
+\smallskip
 
 \noindent 
 
-On rationality: Very well thought out design. A lot of effort went into making the code safe, for example limiting message size: 
+\noindent \textbf{gRPC Implementation}
 
-\begin{lstlisting}[language=python,caption={code safety code sample}]
+\smallskip
+
+\noindent On rationality: Very well thought out design. A lot of effort went into making the code safe, for example limiting message size: 
+
+\begin{lstlisting}[language=python,caption={Code Safety Example}]
   # check length requirements
-  if len(request.message) > 250 or len(request.receiver) > 50 or len(request.sender) > 50:
+  if len(request.message) > 250 or len(request.receiver) > 50:
     res.status = -1
     return res
 \end{lstlisting}
 
-Python dictionaries are concurrency safe. But the project goes above and beyond in handling concurrent requests. If there is extra credit, would flag this project as a contender. 
+\noindent Python dictionaries are concurrency safe. But the project goes above and beyond in handling concurrent requests. If there is extra credit, would flag this project as a contender. One note: the design could better leverage the inherent structure of gRPC. \href{https://web.eecs.umich.edu/~mosharaf/Readings/RPC.pdf}{The strength of gRPC} is the ability to call functions/specify operations on a remote server. Fully leveraging this functionality would simplify the code, by removing some of the work being done on the server. For example, this would make multithreading on the server unnecessary.
 
-One note: the design could better leverage the inherent structure of gRPC. The strength of gRPC is the ability to call functions/specify operations on a remote server. Fully leveraging this functionality would simplify the code, by removing some of the work being done on the server. For example, this would make multithreading on the server unnecessary.
+\medskip
 
-On correctness: Create Account and Login functionality are tied together (ie creating an account automatically triggers login). Our implementation was different, but I think theirs is a better design choice. Attempting to list 0 users from the List Account function sometimes fails, but this is fine, because providing more information than asked for isn't problematic. Everything else works as specified. 
+\noindent On correctness: Create Account and Login functionality are tied together (ie creating an account automatically triggers login). Our implementation was different, but I think theirs is a better design choice. Attempting to list 0 users from the List Account function sometimes fails, but this is fine, because providing more information than asked for isn't problematic. Everything else works as specified. 
 
-On clarity: The provided documentation was comprehensive. The command structure was intuitive. An example of a great explanation:
+\medskip
 
-\textit{To ensure thread safety, we have a lock for every global item, and upon every read or write to that item, we acquire the specific lock until our reads of write are complete for any given thread.} 
-
-
-\begin{lstlisting}[language=python,caption={use code samples like this}]
-def match(query):
-message = ''
-try:
-    for key in client_dictionary.keys():
-        match = re.search(query, key)
-        if match is not None and match.group() == key:
-            message += key + " "
-except Exception as e:
-    print(e)
-    message = 'Regex Error'
-
-return message
-\end{lstlisting}
+\noindent On clarity: The command structure was intuitive and code was well spaced. What we saw in the code paired well with what we read in the documentation.
 
 \section{Documentation}
 
-It is not necessary to place figures and tables at the back of the manuscript. Figures and tables should be sized as they are to appear in the final article. Do not include a separate list of figure captions and table titles.
+The documentation of the project is excellent, both in the code and the installation documentation. The code is well-documented throughout, with helpful comments that explain what is happening below in both the gRPC and non-GRPC implementations. These comments adequately annotate error handling, multithreading, and function capabilities.
+
+\medskip
+
+\noindent The installation documentation was precise and provided us with direct commands to run the provided programs, and even accounted for edge cases such as users on M1-based Mac systems. We were impressed by the extensiveness of the installation and usage documentation, and were happy to have this when testing both implementations for meeting the required specifications.
+
+\section{Grading}
+Given the excellent work and ability to adequately satisfy the project requirements across the three evaluation criteria, we are happy to award this project a \textbf{25/25 score}.
 
 
   
