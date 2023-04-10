@@ -7,8 +7,9 @@ if [[ $response == y ]]; then
     for ((x = 0; x<3; x++)); do
         base=$((6050+10*x))
         pending_file="pending_send_server$x.csv"
+        backend="server$x.json"
         printf " Open %s Terminal on port %s\\n" $x $base
-        osascript -e "tell application \"Terminal\" to do script \"python3 $dir 127.0.0.1 $base $pending_file\"" >/dev/null
+        osascript -e "tell application \"Terminal\" to do script \"python3 $dir 127.0.0.1 $base $pending_file $backend\"" >/dev/null
     done
     client_dir="Dropbox/college/cs262/cs262/client.py"
     for ((x = 0; x<2; x++)); do

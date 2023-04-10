@@ -4,12 +4,10 @@ import sys
 import os
 from _thread import *
 import threading
-import csv, pickle
+import csv, pickle, json
 from enum import Enum
 
 #TODO: store state of system (accounts + message queue) to a file
-#TODO: store message_queue in file *until* acknowledgement received from client
-	#ie, don't delete from message_queue until client has acknowledged recepit 
 
 #NOTE: do we need every if/else branch to contain a return statement?
 #NOTE: check login a '' behavior (caused a system malfunction in design exercise 1)
@@ -24,14 +22,25 @@ class Account:
 	def __init__(self, password):
 		self.password = password
 		self.message_queue = []
+		self.guid_queue = []
 
 def send_msg(socket, guid, msg):
 	response = {'guid': guid, 'msg': msg.encode('utf-8')}
 	pickled = pickle.dumps(response)
 	socket.send(pickled)
+
+def write_accounts(file):
+	a = {}
+	for k in accounts:
+		gq = []
+		for guid in accounts[k].guid_queue:
+			gq.append(str(guid))
+		a[k] = [accounts[k].password, accounts[k].message_queue, gq]
+	with open(file, 'w') as f:
+		json.dump(a, f)
 	
 # This function interprets a transfer buffer that came in over a given socket.
-def interpret(buffer, guid, socket):
+def interpret(buffer, guid, socket, pending_file, backend):
 	command = buffer.decode('utf-8').split(' ')
 	match command[0]: # command[0] maps to commands in our documentation, this is basically an opcode.
 		case 'register': # register command. command[1] is the username, command[2] is the password.
@@ -41,7 +50,8 @@ def interpret(buffer, guid, socket):
 			if command[1] in accounts.keys():
 				send_msg(socket, guid, "Username already registered.")
 				return
-			accounts[command[1]] = Account(command[2])
+			accounts[command[1]] = Account(command[2]) #rewrite to backend
+			write_accounts(backend)
 			send_msg(socket, guid, f'Registered {command[1]}.')
 			return
 
@@ -63,6 +73,13 @@ def interpret(buffer, guid, socket):
 						pass
 					accounts[command[1]].socket = socket
 					send_msg(socket, guid, '\n'.join([f'Authenticated {command[1]}.'] + accounts[command[1]].message_queue))
+					#pending[-1] = {'dest':command[1]}
+					#send_msg(socket, -1, '\n')
+					"""send_msg(socket, guid, f'Authenticated {command[1]}.')
+					for i in range(len(accounts[command[1]].guid_queue)):
+						send_msg(socket, accounts[command[1]].guid_queue[i], accounts[command[1]].message_queue[i])
+						print("debug:", accounts[command[1]].guid_queue[i], accounts[command[1]].message_queue[i])"""
+
 					#accounts[command[1]].message_queue = [] #MOVED TO 'acknowledge' case
 					return
 				else:
@@ -110,7 +127,7 @@ def interpret(buffer, guid, socket):
 								fieldnames = ['guid', 'dest']
 								csvwriter = csv.DictWriter(pending_log, fieldnames=fieldnames)
 								if pending_log.tell() == 0: csvwriter.writeheader()
-								csvwriter.writerow({'guid':guid, 'dest':command[1]})
+								csvwriter.writerow({'guid':guid, 'dest':command[1]}) #waiting on ack from client b to be removed
 						send_msg(accounts[command[1]].socket, guid, f'<{username}> {" ".join(command[2:])}')
 						return
 			except:
@@ -118,19 +135,25 @@ def interpret(buffer, guid, socket):
 					send_msg(socket, guid, "Kindly log in.")
 					return
 				send_msg(socket, guid, "Client offline!")
+				accounts[command[1]].guid_queue.append(guid)
 				accounts[command[1]].message_queue.append(f'<{uname}> {" ".join(command[2:])}')
+				write_accounts(backend)
 			
 		case 'acknowledged':
 			with pendingLock:
 				md = pending.pop(guid)
+				#better practice: should not make these empty lists, and should instead check remove specific guid, message pair
+				#lag on clearing pending file <= 1
+				for k in accounts[md['dest']].guid_queue: pending.pop(k)
+				accounts[md['dest']].guid_queue = []
 				accounts[md['dest']].message_queue = [] #TODO: propagate to file
-				open(pending_file, 'w').close() #flush pending_file
 				with open (pending_file, 'w') as pending_log:
 					fieldnames = ['guid', 'dest']
 					csvwriter = csv.DictWriter(pending_log, fieldnames=fieldnames)
 					csvwriter.writeheader()
 					for id in pending:
 						csvwriter.writerow({'guid':id, 'dest':pending[id]['dest']})
+			write_accounts(backend)
 			return
 
 		case _: # uninterpretable, so send error.
@@ -138,7 +161,7 @@ def interpret(buffer, guid, socket):
 			return
 
 # This function represents a client thread. Each client gets once.
-def clientthread(conn):
+def clientthread(conn, pending_file, backend):
 	while True:
 		try:
 			data = conn.recv(4096)
@@ -148,7 +171,7 @@ def clientthread(conn):
 						accounts[username].socket = None
 				break
 			msgDict = pickle.loads(data)
-			interpret(msgDict['msg'], msgDict['guid'], conn)
+			interpret(msgDict['msg'], msgDict['guid'], conn, pending_file, backend)
 		except:
 			continue
 
@@ -159,6 +182,8 @@ if __name__ == "__main__":
 	IP_address = str(sys.argv[1])
 	Port = int(sys.argv[2])
 	
+
+	backend = "db-server-accounts.csv"
 	pending_file = "db-server.csv"
 
 	if len(sys.argv) > 3:
@@ -171,6 +196,18 @@ if __name__ == "__main__":
 		csvreader = csv.DictReader(pending_log)
 		for row in csvreader:
 			pending[row['guid']] = {'dest':row['dest']}
+	
+	try:
+		with open (backend, 'r') as file:
+			json_obj = json.load(file)
+			a = json.loads(json_obj)
+			for k in a:
+				gq = []
+				for guid in a[k]['guid_queue']:
+					gq.append(int(guid))
+				accounts[k] = Account(a[k]['password'], a[k]['message_queue'], gq)
+	except:
+		pass
 
 	while True: # infinite loop to continually accept new clients
 		conn, addr = server.accept()
@@ -179,7 +216,7 @@ if __name__ == "__main__":
 		m = {'guid': -1, 'msg': 'Connected!'.encode('utf-8')}
 		pickled = pickle.dumps(m)
 		conn.send(pickled)
-		start_new_thread(clientthread,(conn,))
+		start_new_thread(clientthread,(conn,pending_file, backend,))
 
 
 #persistence, server-side:
