@@ -18,13 +18,14 @@ def set_timer(guid, pending, pending_file, servers, serversLock):
             cpy = servers.copy()
             for s in cpy:
                 #remove all failed servers
-                if s not in pending[guid]: servers.remove(s)
+                if s not in pending[guid]: 
+                    print("removing server:", s.fileno())
+                    servers.remove(s)
         
         try:
             #pop from dict
             md = pending.pop(guid)
             #remove from file
-            open(pending_file, 'w').close() #flush pending_file
             with open (pending_file, 'w') as pending_log:
                 fieldnames = ['guid', 'msg']
                 csvwriter = csv.DictWriter(pending_log, fieldnames=fieldnames)
@@ -71,8 +72,9 @@ if __name__ == "__main__":
         servers_lst[i].connect((ip, ports[i]))
 
     #attempt send all pending_msgs
-    #TODO: DO NOT SEND ACK MESSAGES!!
+        #do not send pending acknowledgements
     for id in pending:
+        if pending[id]['send_in_fut']: continue
         m = {'guid': id, 'msg': pending[id]['msg'].encode('utf-8')}
         pickled = pickle.dumps(m)
         for server in servers_lst:
@@ -99,7 +101,7 @@ if __name__ == "__main__":
                 else:
                     pending[msgDict['guid']]['ack'] = msgDict['msg'].decode('utf-8') #atomic operations, no lock needed
                     pending[msgDict['guid']]['ack_servers'].add(socks)
-                    #print("adding server to pending:", msgDict['guid'], len(pending[msgDict['guid']]['ack_servers']))
+                    print("adding server to pending:", msgDict['guid'], len(pending[msgDict['guid']]['ack_servers']))
                 
                 if servers.issubset(pending[msgDict['guid']]['ack_servers']): #all servers have ack receipt/sent message
                     message = print(msgDict['msg'].decode('utf-8'), "from: ", socks.fileno()) 
@@ -111,7 +113,6 @@ if __name__ == "__main__":
                                 m = {'guid':msgDict['guid'], 'msg':md['msg'].encode('utf-8')}
                                 pickled = pickle.dumps(m)
                                 s.send(pickled)
-                        open(pending_file, 'w').close() #flush pending_file
                         with open (pending_file, 'w') as pending_log:
                             fieldnames = ['guid', 'msg']
                             csvwriter = csv.DictWriter(pending_log, fieldnames=fieldnames)
