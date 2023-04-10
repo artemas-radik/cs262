@@ -1,0 +1,4 @@
+[1m[92m[127.0.0.1:6070][0m Connected!
+[1m[92m[127.0.0.1:6070][0m Authenticated sara.
+[1m[92m[127.0.0.1:6070][0m Users: a, c, sara, abby, anna, aria.
+[1m[92m[127.0.0.1:6070][0m Account deleted.

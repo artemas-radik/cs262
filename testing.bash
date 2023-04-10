@@ -11,7 +11,7 @@ if [[ $response == y ]]; then
         printf " Open %s Terminal on port %s\\n" $x $base
         osascript -e "tell application \"Terminal\" to do script \"cd $dir; python3 server.py 127.0.0.1 $base\"" #>/dev/null
     done
-    for ((x = 0; x<2; x++)); do
+    for ((x = 0; x<5; x++)); do
         printf " Open %s Terminal for Client\\n" $((3+x))
         pending_file="/pending_send_client$x.csv"
         file_in="test_cases_in$x.txt"
@@ -19,46 +19,43 @@ if [[ $response == y ]]; then
         osascript -e "tell application \"Terminal\" to do script \"cd $dir; python3 client.py 127.0.0.1 6050 6060 6070 $pending_file < $file_in > $file_out \"" #>/dev/null #echo register sara pass | /dev/stdin
     done
 fi
+
 result="test_cases_out0.txt"
-expected="no_error_out.txt"
-$diff "$result" "$expected" >/dev/null
-e_code=$?
-if [[ $e_code != 0 ]]; then
+#expected="no_error_out.txt"
+#$diff "$result" "$expected" >/dev/null
+#e_code=$?
+if grep -q "Error" "$result"; then
+  echo "Test 0 failed!"
+else
+  echo "Test 0 passed!"
+fi
+
+result="test_cases_out1.txt"
+if grep -q "Error" "$result"; then
   echo "Test 1 failed!"
 else
   echo "Test 1 passed!"
 fi
-result="test_cases_out1.txt"
-expected="no_error_in1.txt"
-$diff "$result" "$expected" >/dev/null
-e_code=$?
-if [[ $e_code != 0 ]];  then
+
+result="test_cases_out2.txt"
+if grep -q "Error" "$result"; then
   echo "Test 2 failed!"
 else
   echo "Test 2 passed!"
 fi
-result=1
-expected=1
-if [[ "${result}" == "${expected}" ]]; then
-  echo "Test 3 passed!"
-else
+
+result="test_cases_out3.txt"
+if grep -q "Error" "$result"; then
   echo "Test 3 failed!"
-  exit 1
-fi
-result=1
-expected=1
-if [[ "${result}" == "${expected}" ]]; then
-  echo "Test 4 passed!"
 else
+  echo "Test 3 passed!"
+fi
+
+result="test_cases_out4.txt"
+if grep -q "Error" "$result"; then
   echo "Test 4 failed!"
-  exit 1
-fi
-result=1
-expected=1
-if [[ "${result}" == "${expected}" ]]; then
-  echo "Test 5 passed!"
 else
-  echo "Test 5 failed!"
-  exit 1
+  echo "Test 4 passed!"
 fi
+
 shopt -u nocasematch

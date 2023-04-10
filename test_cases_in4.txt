@@ -1,0 +1,8 @@
+register sally hello
+register abby hi
+login sally hello
+message abby whatsup
+message abby whatsup
+message abby whatsup
+message abby whatsup
+message abby whatsup

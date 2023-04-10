@@ -1,3 +1,2 @@
 register abby pass
-register anna pass
-register aria pass 
+login abby pass
