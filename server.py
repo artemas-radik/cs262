@@ -79,7 +79,7 @@ def interpret(buffer, socket):
 				socket.send("User dne.".encode('utf-8'))
 				return
 			try:
-				for username in accounts:
+				for username in accounts.keys():
 					if accounts[username].socket == socket:
 						logged_in = True
 						uname = username
