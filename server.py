@@ -73,12 +73,7 @@ def interpret(buffer, guid, socket, pending_file, backend):
 					send_msg(socket, guid, '\n'.join([f'Authenticated {command[1]}.'] + accounts[command[1]].message_queue))
 					#pending[-1] = {'dest':command[1]}
 					#send_msg(socket, -1, '\n')
-					"""send_msg(socket, guid, f'Authenticated {command[1]}.')
-					for i in range(len(accounts[command[1]].guid_queue)):
-						send_msg(socket, accounts[command[1]].guid_queue[i], accounts[command[1]].message_queue[i])
-						print("debug:", accounts[command[1]].guid_queue[i], accounts[command[1]].message_queue[i])"""
-
-					#accounts[command[1]].message_queue = [] #MOVED TO 'acknowledge' case
+					#accounts[command[1]].message_queue = [] #MOVED TO 'acknowledge' case, as we do not want to erase the message queue until we're sure the client has received the message
 					return
 				else:
 					send_msg(socket, guid, f'Wrong password.')
@@ -140,6 +135,7 @@ def interpret(buffer, guid, socket, pending_file, backend):
 				write_accounts(backend)
 			
 		case 'acknowledged':
+			#handle acknowledgement from client, of message sent
 			with pendingLock:
 				print("debug ack", len(pending.keys()), guid)
 				md = pending.pop(guid, {})
@@ -147,11 +143,7 @@ def interpret(buffer, guid, socket, pending_file, backend):
 				#better practice: should not make these empty lists, and should instead check remove specific guid, message pair
 				#lag on clearing pending file <= 1
 				print("client acknowledged message receipt")
-				"""if 'dest' in md:
-					for k in accounts[md['dest']].guid_queue: 
-						pending.pop(k)
-					accounts[md['dest']].guid_queue = []
-					accounts[md['dest']].message_queue = []"""
+
 				open(pending_file, 'w').close()
 				with open (pending_file, 'w') as pending_log:
 					fieldnames = ['guid', 'dest']
@@ -186,12 +178,12 @@ def clientthread(conn, pending_file, backend):
 
 # Run at startup.
 if __name__ == "__main__":
+	#initialize server state variables
 	server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	IP_address = str(sys.argv[1])
 	Port = int(sys.argv[2])
 	
-
 	backend = "db-server-accounts.csv"
 	pending_file = "db-server.csv"
 
@@ -201,18 +193,17 @@ if __name__ == "__main__":
 	server.bind((IP_address, Port))
 	server.listen(100)
 
+	#fill pending from pending_file
 	with open (pending_file, 'r') as pending_log:
 		csvreader = csv.DictReader(pending_log)
 		for row in csvreader:
 			pending[row['guid']] = {'dest':row['dest']}
 	
 	try:
+		#fill accounts from server backend
 		with open (backend) as file:
 			a = json.load(file)
 			for k in a:
-				"""gq = []
-				for guid in a[k][2]:
-					gq.append(int(guid))"""
 				accounts[k] = Account(a[k][0], a[k][1], a[k][2])
 				print("debug", k, a[k][1])
 	except Exception as e: 
