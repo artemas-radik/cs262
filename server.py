@@ -140,21 +140,26 @@ def interpret(buffer, guid, socket, pending_file, backend):
 			
 		case 'acknowledged':
 			with pendingLock:
-				md = pending.pop(guid)
+				print("debug ack", len(pending.keys()), guid)
+				md = pending.pop(guid, {})
+				print(md)
 				#better practice: should not make these empty lists, and should instead check remove specific guid, message pair
 				#lag on clearing pending file <= 1
 				print("client acknowledged message receipt")
-				for k in accounts[md['dest']].guid_queue: 
-					pending.pop(k)
-				accounts[md['dest']].guid_queue = []
-				accounts[md['dest']].message_queue = []
-				print("debug", len(pending.keys()))
-				#open(pending_file, 'w').close()
+				"""if 'dest' in md:
+					for k in accounts[md['dest']].guid_queue: 
+						pending.pop(k)
+					accounts[md['dest']].guid_queue = []
+					accounts[md['dest']].message_queue = []"""
+				open(pending_file, 'w').close()
 				with open (pending_file, 'w') as pending_log:
 					fieldnames = ['guid', 'dest']
 					csvwriter = csv.DictWriter(pending_log, fieldnames=fieldnames)
 					csvwriter.writeheader()
 					for id in pending:
+						if 'dest' in md and pending[id]['dest'] == md['dest']:
+							pending.pop(id, {})
+							continue
 						csvwriter.writerow({'guid':id, 'dest':pending[id]['dest']})
 			write_accounts(backend)
 			return
