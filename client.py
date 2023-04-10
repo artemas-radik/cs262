@@ -73,7 +73,10 @@ if __name__ == "__main__":
     #connect to servers
     servers_lst = list(servers)
     for i in range(num_servers):
-        servers_lst[i].connect((ips[i], ports[i]))
+        try:
+            servers_lst[i].connect((ips[i], ports[i]))
+        except:
+            pass
 
     #attempt send all pending_msgs
         #do not send pending acknowledgements
@@ -92,8 +95,10 @@ if __name__ == "__main__":
             #message received from server
             if socks in servers:
                 data = socks.recv(4096)
-                if (data == ''): 
-                    pass #NOTE: assumption = timeout will shut down server in this case
+                if (len(bytes(data)) == 0): 
+                    sockets_list.remove(socks)
+                    continue
+                
                 msgDict = pickle.loads(data)
 
                 if msgDict['guid'] not in pending:
