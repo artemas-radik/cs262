@@ -14,7 +14,7 @@
               "type": "markdown",
               "state": {
                 "file": "readme.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               }
             }
@@ -147,5 +147,17 @@
     }
   },
   "active": "8185282fbb37031e",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "test_cases_out4.txt",
+    "test_cases_out3.txt",
+    "test_cases_out2.txt",
+    "test_cases_in4.txt",
+    "test_cases_in3.txt",
+    "test_cases_in2.txt",
+    "pending_send_client4.csv",
+    "pending_send_client3.csv",
+    "pending_send_client2.csv",
+    "pending_send_client1.csv",
+    "pending_send_client0.csv"
+  ]
 }
