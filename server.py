@@ -86,6 +86,7 @@ def interpret(buffer, guid, socket, pending_file, backend):
 			send_msg(socket, guid, f'Username not found, or incorrect command usage.')
 
 		case 'deleteacc': # deleteacc command. authentication required.
+			#edge case of failure after deleteacc not always handled, but message drop is handled
 			for account in accounts.keys():
 				try:
 					if accounts[account].socket == socket:
