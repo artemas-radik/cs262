@@ -1,4 +1,4 @@
-import socket, select, sys
+import socket, select, sys, os
 from _thread import *
 import threading
 import uuid, pickle, csv, time
@@ -50,14 +50,18 @@ if __name__ == "__main__":
     servers = set([socket.socket(socket.AF_INET, socket.SOCK_STREAM) for i in range(num_servers)])
     serversLock = threading.Lock()
 
-    #initialize client state variables
-    ip = str(sys.argv[1])
-    ports = [int(sys.argv[i+2]) for i in range(num_servers)]
+    ips = ["20.121.21.153", "20.168.51.12", "20.63.58.144"]
+    ports = [5000, 5000, 5000]
+    pending_file = "db-client.csv"
 
-    base = "/Users/swatigoel/Dropbox/college/cs262/cs262/"
-    pending_file = base + str(sys.argv[num_servers+2]) #requests which user "sent", but has not yet received full acknowledgement for 
+    if len(sys.argv) > 1:
+        #initialize client state variables
+        ips =  [str(sys.argv[1]) for _ in range(num_servers)]
+        ports = [int(sys.argv[i+2]) for i in range(num_servers)]
+        pending_file = os.getcwd() + str(sys.argv[num_servers+2]) #requests which user "sent", but has not yet received full acknowledgement for 
         #if crash, client once again waits for confirmation from all servers (slightly inefficient, but cleaner code) 
         #row = guid, message
+
     pending = {} #msg = message sent/to be sent to server, ack = acknowledgement to be printed on client, ack_servers = servers which have confirmed receipt, send_in_fut = bool flag, determined behavior upon total ack
 
     #fill pending
@@ -69,7 +73,7 @@ if __name__ == "__main__":
     #connect to servers
     servers_lst = list(servers)
     for i in range(num_servers):
-        servers_lst[i].connect((ip, ports[i]))
+        servers_lst[i].connect((ips[i], ports[i]))
 
     #attempt send all pending_msgs
         #do not send pending acknowledgements

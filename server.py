@@ -1,6 +1,7 @@
 import socket
 import select
 import sys
+import os
 from _thread import *
 import threading
 import csv, pickle, json
@@ -116,7 +117,7 @@ def interpret(buffer, guid, socket, pending_file, backend):
 				send_msg(socket, guid, "User dne.")
 				return
 			try:
-				for username in accounts:
+				for username in accounts.keys():
 					if accounts[username].socket == socket:
 						logged_in = True
 						uname = username
@@ -178,16 +179,16 @@ def clientthread(conn, pending_file, backend):
 if __name__ == "__main__":
 	server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	#try: 
 	IP_address = str(sys.argv[1])
 	Port = int(sys.argv[2])
-	"""except:
-		IP_address = "52.152.216.212"
-		Port = 5000"""
 	
-	base = "/Users/swatigoel/Dropbox/college/cs262/cs262/"
-	pending_file = base + str(sys.argv[3])
-	backend = base + str(sys.argv[4])
+
+	backend = "db-server-accounts.csv"
+	pending_file = "db-server.csv"
+
+	if len(sys.argv) > 3:
+		pending_file = os.getcwd() + str(sys.argv[3])
+		
 	server.bind((IP_address, Port))
 	server.listen(100)
 
