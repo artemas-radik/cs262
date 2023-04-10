@@ -26,6 +26,7 @@ def set_timer(guid, pending, pending_file, servers, serversLock):
             #pop from dict
             md = pending.pop(guid)
             #remove from file
+            open(pending_file, 'w').close()
             with open (pending_file, 'w') as pending_log:
                 fieldnames = ['guid', 'msg']
                 csvwriter = csv.DictWriter(pending_log, fieldnames=fieldnames)
@@ -122,6 +123,7 @@ if __name__ == "__main__":
                                 m = {'guid':msgDict['guid'], 'msg':md['msg'].encode('utf-8')}
                                 pickled = pickle.dumps(m)
                                 s.send(pickled)
+                        open(pending_file, 'w').close()
                         with open (pending_file, 'w') as pending_log:
                             fieldnames = ['guid', 'msg']
                             csvwriter = csv.DictWriter(pending_log, fieldnames=fieldnames)
@@ -132,7 +134,7 @@ if __name__ == "__main__":
             #command received from user
             else:
                 l = sys.stdin.readline().strip()
-                guid = uuid.uuid4()
+                guid = str(uuid.uuid4())
                 m = {'guid': guid, 'msg': l.encode('utf-8')}
                 pickled = pickle.dumps(m)
 
