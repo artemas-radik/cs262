@@ -1,6 +1,17 @@
 import socket, select, sys, os, uuid, pickle, csv, time, threading
 from _thread import *
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def set_timer(guid, pending, pending_file, servers, serversLock):
     time.sleep(10) #allowed lag time
     with serversLock:
@@ -68,6 +79,7 @@ if __name__ == "__main__":
         try:
             servers_lst[i].connect((ips[i], ports[i]))
         except:
+            print(bcolors.FAIL + f"Server [{ips[i]}:{ports[i]}] offline." + bcolors.ENDC)
             servers.remove(servers_lst[i])
             pass
 
@@ -90,6 +102,7 @@ if __name__ == "__main__":
                 data = socks.recv(4096)
                 if (len(bytes(data)) == 0):
                     servers.remove(socks)
+                    print(bcolors.FAIL + f"Server [{socks.getpeername()[0]}:{socks.getpeername()[1]}] offline." + bcolors.ENDC)
                     break
                 
                 msgDict = pickle.loads(data)
@@ -99,17 +112,13 @@ if __name__ == "__main__":
                     #implies dictionary pending does not need to be persistent on client
                     pending[msgDict['guid']] = {'msg':"acknowledged", 'ack':msgDict['msg'].decode('utf-8'), 'ack_servers':set([socks]), 'send_in_fut':True} #nobody else could be modifying this key yet, no lock needed
                     start_new_thread(set_timer,(msgDict['guid'], pending, pending_file, servers, serversLock))
-                    print(pending[msgDict['guid']])
-                    print(pending[msgDict['guid']]['ack_servers'])
-                    print(servers)
 
                 else:
                     pending[msgDict['guid']]['ack'] = msgDict['msg'].decode('utf-8') #atomic operations, no lock needed
                     pending[msgDict['guid']]['ack_servers'].add(socks)
                 
-                print(servers.issubset(pending[msgDict['guid']]['ack_servers']))
                 if servers.issubset(pending[msgDict['guid']]['ack_servers']): #all servers have ack receipt/sent message
-                    message = print(msgDict['msg'].decode('utf-8'), "from: ", socks.getpeername()) 
+                    message = print(bcolors.BOLD + bcolors.OKGREEN + f"[{socks.getpeername()[0]}:{socks.getpeername()[1]}]" + bcolors.ENDC, msgDict['msg'].decode('utf-8')) 
                     with serversLock:
                         md = pending.pop(msgDict['guid'])
                         #send ack message, if needed
