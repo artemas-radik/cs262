@@ -1,15 +1,16 @@
-import socket, select, sys, os
+import socket, select, sys, os, uuid, pickle, csv, time, threading
 from _thread import *
-import threading
-import uuid, pickle, csv, time
 
-#TODO: handle case "Connection!"
-    #ie guid == -1
-
-#TODO: store guids of all messages ever sent, on clients
-
-#NOTE: we're currently rewriting pending file upon every delete
-
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def set_timer(guid, pending, pending_file, servers, serversLock):
     time.sleep(10) #allowed lag time
@@ -19,9 +20,7 @@ def set_timer(guid, pending, pending_file, servers, serversLock):
             for s in cpy:
                 #remove all failed servers
                 if s not in pending[guid]: 
-                    print("removing server:", s.fileno())
                     servers.remove(s)
-        
         try:
             #pop from dict
             md = pending.pop(guid)
@@ -33,6 +32,9 @@ def set_timer(guid, pending, pending_file, servers, serversLock):
                 csvwriter.writeheader()
                 for id in pending:
                     csvwriter.writerow({'guid':id, 'msg':pending[id]['msg']})
+                    csvwriter.writerow({'guid':id, 'msg':pending[id]['msg']})
+            
+                    csvwriter.writerow({'guid':id, 'msg':pending[id]['msg']})  
             
             #print ack message
             print(pending[guid]['ack'])
@@ -77,10 +79,12 @@ if __name__ == "__main__":
         try:
             servers_lst[i].connect((ips[i], ports[i]))
         except:
+            print(bcolors.FAIL + f"Server [{ips[i]}:{ports[i]}] offline." + bcolors.ENDC)
+            servers.remove(servers_lst[i])
             pass
 
     #attempt send all pending_msgs
-        #do not send pending acknowledgements
+    #do not send pending acknowledgements
     for id in pending:
         if pending[id]['send_in_fut']: continue
         m = {'guid': id, 'msg': pending[id]['msg'].encode('utf-8')}
@@ -92,32 +96,29 @@ if __name__ == "__main__":
     while True:
         sockets_list = [sys.stdin] + list(servers)
         read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
-        count = 1
         for socks in read_sockets:
             #message received from server
             if socks in servers:
-                print(count)
-                count += 1
                 data = socks.recv(4096)
                 if (len(bytes(data)) == 0):
                     servers.remove(socks)
+                    print(bcolors.FAIL + f"Server [{socks.getpeername()[0]}:{socks.getpeername()[1]}] offline." + bcolors.ENDC)
                     break
                 
                 msgDict = pickle.loads(data)
 
                 if msgDict['guid'] not in pending:
-                    print("adding to pending:", msgDict['guid'], msgDict['msg'].decode('utf-8'))
                     #in this case, server initiated message, not client
                     #implies dictionary pending does not need to be persistent on client
                     pending[msgDict['guid']] = {'msg':"acknowledged", 'ack':msgDict['msg'].decode('utf-8'), 'ack_servers':set([socks]), 'send_in_fut':True} #nobody else could be modifying this key yet, no lock needed
                     start_new_thread(set_timer,(msgDict['guid'], pending, pending_file, servers, serversLock))
+
                 else:
                     pending[msgDict['guid']]['ack'] = msgDict['msg'].decode('utf-8') #atomic operations, no lock needed
                     pending[msgDict['guid']]['ack_servers'].add(socks)
-                    print("adding server to pending:", msgDict['guid'], len(pending[msgDict['guid']]['ack_servers']))
                 
                 if servers.issubset(pending[msgDict['guid']]['ack_servers']): #all servers have ack receipt/sent message
-                    message = print(msgDict['msg'].decode('utf-8'), "from: ", socks.fileno()) 
+                    message = print(bcolors.BOLD + bcolors.OKGREEN + f"[{socks.getpeername()[0]}:{socks.getpeername()[1]}]" + bcolors.ENDC, msgDict['msg'].decode('utf-8')) 
                     with serversLock:
                         md = pending.pop(msgDict['guid'])
                         #send ack message, if needed
@@ -151,19 +152,3 @@ if __name__ == "__main__":
                 start_new_thread(set_timer,(guid, pending, pending_file, servers, serversLock))
                 for server in servers:
                     server.send(pickled)
-
-#Client A --> Server
-#if system crashes before message is processed client-side, nothing we can do
-#if system crashes after message is sent but before message is processed, pending_messages on disk --> message resent
-#if system crashes after message is processed by server but before ack is sent to client --> handled server side
-    #client might also resend message, but server keeps tracks of guids, so this is fine
-#if system crashes after ack is sent to client, but before ack is processed by client
-    #pending_messages --> resent
-
-#Server --> Client B
-#if system crashes after message sent but before message removed from pending
-    #server resends
-#if system crashes after message sent but before client sends back ack
-    #server resends (still in some pending apparatus)
-#if system crashes after ack received by server, but before server removes from pending
-    #server resends, and client is keeping track of guids, so no harm done
