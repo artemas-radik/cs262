@@ -159,7 +159,11 @@ if __name__ == "__main__":
 	IP_address = str(sys.argv[1])
 	Port = int(sys.argv[2])
 	
-	pending_file = os.getcwd() + str(sys.argv[3])
+	pending_file = "db-server.csv"
+
+	if len(sys.argv) > 3:
+		pending_file = os.getcwd() + str(sys.argv[3])
+		
 	server.bind((IP_address, Port))
 	server.listen(100)
 
