@@ -1,11 +1,11 @@
 # Fdb version 3
-["biber template"] 1681096505 "template.bcf" "template.bbl" "template" 1681097490
-  "template.bcf" 1681097490 105726 33fa751487717f0739913cf29091b51d "pdflatex"
+["biber template"] 1681096505 "template.bcf" "template.bbl" "template" 1681097688
+  "template.bcf" 1681097688 105726 33fa751487717f0739913cf29091b51d "pdflatex"
   (generated)
   "template.bbl"
   "template.blg"
-["pdflatex"] 1681097489 "/Users/artemas/Documents/github/cs262/latex/template.tex" "template.pdf" "template" 1681097490
-  "/Users/artemas/Documents/github/cs262/latex/template.tex" 1681097489 9891 8aaee3a5b30ff06dd08803f9d9bd171b ""
+["pdflatex"] 1681097687 "/Users/artemas/Documents/github/cs262/latex/template.tex" "template.pdf" "template" 1681097688
+  "/Users/artemas/Documents/github/cs262/latex/template.tex" 1681097686 9901 fb2ef60d1f2d054f6121072486c7b921 ""
   "/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2022/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2022/texmf-dist/fonts/tfm/adobe/palatino/pplb8r.tfm" 1136768653 2532 9ad73cf4dd2173a847f2a5f5608e0b9a ""
@@ -195,11 +195,11 @@
   "/usr/local/texlive/2022/texmf-var/web2c/pdftex/pdflatex.fmt" 1662055948 2826436 d47e8d00cbead042c5c0bbf2d7353c1f ""
   "/usr/local/texlive/2022/texmf.cnf" 1647878952 577 209b46be99c9075fd74d4c0369380e8c ""
   "LTJournalArticle.cls" 1681088185 10062 10572277e27f770fa87f7d3d111011d3 ""
-  "template.aux" 1681097490 1190 6a9a0068db93e4637ec558f36961ebcf "pdflatex"
+  "template.aux" 1681097688 1190 6a9a0068db93e4637ec558f36961ebcf "pdflatex"
   "template.bbl" 1681096506 466 ee04f40f768daeed26442158e95aba61 "biber template"
-  "template.out" 1681097490 504 5688d2104538e2a8d1594b965e55ae22 "pdflatex"
-  "template.run.xml" 1681097490 2329 dd0b28ad5248dccc56c9d3651d0f9aad "pdflatex"
-  "template.tex" 1681097489 9891 8aaee3a5b30ff06dd08803f9d9bd171b ""
+  "template.out" 1681097688 504 5688d2104538e2a8d1594b965e55ae22 "pdflatex"
+  "template.run.xml" 1681097688 2329 dd0b28ad5248dccc56c9d3651d0f9aad "pdflatex"
+  "template.tex" 1681097686 9901 fb2ef60d1f2d054f6121072486c7b921 ""
   (generated)
   "template.aux"
   "template.bcf"

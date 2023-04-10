@@ -60,7 +60,7 @@ In our system design, several edge cases arose for which we needed to account fo
 \begin{enumerate}
 	\item Storing received-yet-unsent messages on-disk is not sufficient for server persistence. Imagine the case where a message is sent by a client and received by the server (so TCP succeeds and does not retransmit) but then the server dies before buffering the message and saving it on-disk. Hence any messages sitting in the server's socket stream are also not persisted upon failure.
 	\item What happens when the entire distributed system is brough offline, some time passes, and then it's brought back online? How do we handle data that is potentially in network transit at the time of system death?
-	\item How do we prevent repeated retransmission of identical data, which would be both slow and costly at-scale?
+	\item How do we prevent repeated retransmission of identical data, which would be both slow and expensive at large scales?
 \end{enumerate}
 
 \section{III. Our Approach}
