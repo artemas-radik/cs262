@@ -2,34 +2,53 @@ import socket
 import select
 import sys
 from _thread import *
+import threading
+import csv, pickle
 from enum import Enum
+
+#TODO: store state of system (accounts + message queue) to a file
+#TODO: store message_queue in file *until* acknowledgement received from client
+	#ie, don't delete from message_queue until client has acknowledged recepit 
+
+#NOTE: do we need every if/else branch to contain a return statement?
+#NOTE: check login a '' behavior (caused a system malfunction in design exercise 1)
 
 # This is a hashmap/dictionary that stores a table of usernames that map to Account objects.
 accounts = {}
+pending = {} 
+pendingLock = threading.Lock()
 
 # Each Account object password, message_queue, socket. The password lets the account log in after terminating a session. The message_queue is used when an account does not have an active socket and messages need to be stored for later delivery. The socket object denotes the Account's current associated object. If it is None, this means the client is currently disconnected. A client can only connect one session at a time.
 class Account:
 	def __init__(self, password):
 		self.password = password
 		self.message_queue = []
+
+def send_msg(socket, guid, msg):
+	response = {'guid': guid, 'msg': msg.encode('utf-8')}
+	pickled = pickle.dumps(response)
+	socket.send(pickled)
 	
 # This function interprets a transfer buffer that came in over a given socket.
-def interpret(buffer, socket):
+def interpret(buffer, guid, socket):
 	command = buffer.decode('utf-8').split(' ')
 	match command[0]: # command[0] maps to commands in our documentation, this is basically an opcode.
-		case 'register': # register command. command[1] is the username, comamnd[2] is the password.
+		case 'register': # register command. command[1] is the username, command[2] is the password.
+			if len(command) <= 2:
+				send_msg(socket, guid, "Invalid/missing password")
+				return
 			if command[1] in accounts.keys():
-				socket.send("Username already registered.".encode('utf-8'))
+				send_msg(socket, guid, "Username already registered.")
 				return
 			accounts[command[1]] = Account(command[2])
-			socket.send(f'Registered {command[1]}.'.encode('utf-8'))
+			send_msg(socket, guid, f'Registered {command[1]}.')
 			return
 
-		case 'login': # login command. command[1] is the username, comamnd[2] is the password.
+		case 'login': # login command. command[1] is the username, command[2] is the password.
 			for u in accounts.keys():
 				try:
 					if accounts[u].socket == socket:
-						socket.send("Ma'am, you are already logged in.".encode('utf-8'))
+						send_msg(socket, guid, "You are already logged in.")
 						return
 				except:
 					pass
@@ -37,28 +56,29 @@ def interpret(buffer, socket):
 				if accounts[command[1]].password == command[2]:
 					try:
 						if accounts[command[1]].socket:
-							socket.send("Max devices which can login at once: 1.".encode('utf-8'))
+							send_msg(socket, guid, "Max devices which can login at once: 1.")
 							return
 					except:
 						pass
 					accounts[command[1]].socket = socket
-					socket.send('\n'.join([f'Authenticated {command[1]}.'] + accounts[command[1]].message_queue).encode('utf-8'))
-					accounts[command[1]].message_queue = []
+					send_msg(socket, guid, '\n'.join([f'Authenticated {command[1]}.'] + accounts[command[1]].message_queue))
+					#accounts[command[1]].message_queue = [] #MOVED TO 'acknowledge' case
 					return
 				else:
-					socket.send(f'Wrong password.'.encode('utf-8'))
-			socket.send(f'Username not found.'.encode('utf-8'))
+					send_msg(socket, guid, f'Wrong password.')
+					return
+			send_msg(socket, guid, f'Username not found, or incorrect command usage.')
 
 		case 'deleteacc': # deleteacc command. authentication required.
 			for account in accounts.keys():
 				try:
 					if accounts[account].socket == socket:
 						del accounts[account]
-						socket.send(f'Account deleted.'.encode('utf-8'))
+						send_msg(socket, guid, f'Account deleted.')
 						return
 				except:
 					pass
-			socket.send(f'Not authenticated.'.encode('utf-8'))
+			send_msg(socket, guid, f'Not authenticated.')
 
 		case 'accdump' | 'accfilter': # accdump/accfilter commands. these are combined because an accdump is equivalent to an accfilter with an empty wildcard.
 			if accounts:
@@ -66,34 +86,54 @@ def interpret(buffer, socket):
 				for account in accounts:
 					if command[0] == 'accdump' or command[1] in account:
 						dump += f'{account}, '
-				socket.send((dump[:-2]+'.').encode('utf-8'))
+				send_msg(socket, guid, (dump[:-2]+'.'))
 				return
 			else:
-				socket.send('No accounts found.')
+				send_msg(socket, guid, 'No accounts found.')
 				return
 
 		case 'message': # message command. command[1] is the target username, command[2:] is the message content (we join these into one string). authentication required. if try to deliver message to account that isn't in a current session, then it gets queued on the account object.
 			logged_in = False
 			uname = "Guest"
 			if command[1] not in accounts:
-				socket.send("User dne.".encode('utf-8'))
+				send_msg(socket, guid, "User dne.")
 				return
 			try:
 				for username in accounts:
 					if accounts[username].socket == socket:
 						logged_in = True
 						uname = username
-						accounts[command[1]].socket.send(f'<{username}> {" ".join(command[2:])}'.encode('utf-8'))
+						with pendingLock:
+							pending[guid] = {'dest':command[1]}
+							with open (pending_file, 'a') as pending_log:
+								fieldnames = ['guid', 'dest']
+								csvwriter = csv.DictWriter(pending_log, fieldnames=fieldnames)
+								if pending_log.tell() == 0: csvwriter.writeheader()
+								csvwriter.writerow({'guid':guid, 'dest':command[1]})
+						send_msg(accounts[command[1]].socket, guid, f'<{username}> {" ".join(command[2:])}')
 						return
 			except:
 				if (not logged_in):
-					socket.send("Kindly log in.".encode('utf-8'))
+					send_msg(socket, guid, "Kindly log in.")
 					return
-				socket.send("Client offline!".encode('utf-8'))
+				send_msg(socket, guid, "Client offline!")
 				accounts[command[1]].message_queue.append(f'<{uname}> {" ".join(command[2:])}')
+			
+		case 'acknowledged':
+			with pendingLock:
+				md = pending.pop(guid)
+				accounts[md['dest']].message_queue = [] #TODO: propagate to file
+				open(pending_file, 'w').close() #flush pending_file
+				with open (pending_file, 'w') as pending_log:
+					fieldnames = ['guid', 'dest']
+					csvwriter = csv.DictWriter(pending_log, fieldnames=fieldnames)
+					csvwriter.writeheader()
+					for id in pending:
+						csvwriter.writerow({'guid':id, 'dest':pending[id]['dest']})
+			return
 
 		case _: # uninterpretable, so send error.
-			socket.send('[FAILURE] Incorrect command usage.'.encode('utf-8'))
+			send_msg(socket, guid, '[FAILURE] Incorrect command usage.')
 			return
 
 # This function represents a client thread. Each client gets once.
@@ -106,7 +146,8 @@ def clientthread(conn):
 					if accounts[username].socket == conn:
 						accounts[username].socket = None
 				break
-			interpret(data, conn)
+			msgDict = pickle.loads(data)
+			interpret(msgDict['msg'], msgDict['guid'], conn)
 		except:
 			continue
 
@@ -114,17 +155,43 @@ def clientthread(conn):
 if __name__ == "__main__":
 	server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	try: 
-		IP_address = str(sys.argv[1])
-		Port = int(sys.argv[2])
-	except:
+	#try: 
+	IP_address = str(sys.argv[1])
+	Port = int(sys.argv[2])
+	"""except:
 		IP_address = "52.152.216.212"
-		Port = 5000
+		Port = 5000"""
+	
+	base = "/Users/swatigoel/Dropbox/college/cs262/cs262/"
+	pending_file = base + str(sys.argv[3])
 	server.bind((IP_address, Port))
 	server.listen(100)
+
+	with open (pending_file, 'r') as pending_log:
+		csvreader = csv.DictReader(pending_log)
+		for row in csvreader:
+			pending[row['guid']] = {'dest':row['dest']}
 
 	while True: # infinite loop to continually accept new clients
 		conn, addr = server.accept()
 		print (addr[0] + " connected")
-		conn.send('Connected!'.encode('utf-8'))
+
+		m = {'guid': -1, 'msg': 'Connected!'.encode('utf-8')}
+		pickled = pickle.dumps(m)
+		conn.send(pickled)
 		start_new_thread(clientthread,(conn,))
+
+
+#persistence, server-side:
+
+#Client A-->server, post command processed by server
+#entire system crashes
+	#client resends command to server, server *also* reexecutes command (this is redundant)
+	#implies the server does not need to store commands triggered by client
+#server fault handled by client
+#server just needs to store the state of the system to files
+
+#server-->Client B
+#server is responsible for processing message acknowledgement
+#Note: we do not need to implement "resend" functionality (already implemented in form of message_queue)
+	#we just need to move emptying message_queue statement to case acknowledge
