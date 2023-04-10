@@ -7,8 +7,6 @@ import threading
 import csv, pickle, json
 from enum import Enum
 
-#TODO: store state of system (accounts + message queue) to a file
-
 #NOTE: do we need every if/else branch to contain a return statement?
 #NOTE: check login a '' behavior (caused a system malfunction in design exercise 1)
 
@@ -19,10 +17,10 @@ pendingLock = threading.Lock()
 
 # Each Account object password, message_queue, socket. The password lets the account log in after terminating a session. The message_queue is used when an account does not have an active socket and messages need to be stored for later delivery. The socket object denotes the Account's current associated object. If it is None, this means the client is currently disconnected. A client can only connect one session at a time.
 class Account:
-	def __init__(self, password):
+	def __init__(self, password, mqueue=[], gqueue=[]):
 		self.password = password
-		self.message_queue = []
-		self.guid_queue = []
+		self.message_queue = mqueue
+		self.guid_queue = gqueue
 
 def send_msg(socket, guid, msg):
 	response = {'guid': guid, 'msg': msg.encode('utf-8')}
@@ -129,6 +127,7 @@ def interpret(buffer, guid, socket, pending_file, backend):
 								if pending_log.tell() == 0: csvwriter.writeheader()
 								csvwriter.writerow({'guid':guid, 'dest':command[1]}) #waiting on ack from client b to be removed
 						send_msg(accounts[command[1]].socket, guid, f'<{username}> {" ".join(command[2:])}')
+						send_msg(socket, guid, "we've processed your message")
 						return
 			except:
 				if (not logged_in):
@@ -144,9 +143,13 @@ def interpret(buffer, guid, socket, pending_file, backend):
 				md = pending.pop(guid)
 				#better practice: should not make these empty lists, and should instead check remove specific guid, message pair
 				#lag on clearing pending file <= 1
-				for k in accounts[md['dest']].guid_queue: pending.pop(k)
+				print("client acknowledged message receipt")
+				for k in accounts[md['dest']].guid_queue: 
+					pending.pop(k)
 				accounts[md['dest']].guid_queue = []
-				accounts[md['dest']].message_queue = [] #TODO: propagate to file
+				accounts[md['dest']].message_queue = []
+				print("debug", len(pending.keys()))
+				#open(pending_file, 'w').close()
 				with open (pending_file, 'w') as pending_log:
 					fieldnames = ['guid', 'dest']
 					csvwriter = csv.DictWriter(pending_log, fieldnames=fieldnames)
@@ -198,16 +201,16 @@ if __name__ == "__main__":
 			pending[row['guid']] = {'dest':row['dest']}
 	
 	try:
-		with open (backend, 'r') as file:
-			json_obj = json.load(file)
-			a = json.loads(json_obj)
+		with open (backend) as file:
+			a = json.load(file)
 			for k in a:
-				gq = []
-				for guid in a[k]['guid_queue']:
-					gq.append(int(guid))
-				accounts[k] = Account(a[k]['password'], a[k]['message_queue'], gq)
-	except:
-		pass
+				"""gq = []
+				for guid in a[k][2]:
+					gq.append(int(guid))"""
+				accounts[k] = Account(a[k][0], a[k][1], a[k][2])
+				print("debug", k, a[k][1])
+	except Exception as e: 
+		print(e)
 
 	while True: # infinite loop to continually accept new clients
 		conn, addr = server.accept()
