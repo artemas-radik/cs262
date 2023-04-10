@@ -92,13 +92,16 @@ if __name__ == "__main__":
     while True:
         sockets_list = [sys.stdin] + list(servers)
         read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
+        count = 1
         for socks in read_sockets:
             #message received from server
             if socks in servers:
+                print(count)
+                count += 1
                 data = socks.recv(4096)
-                if (len(bytes(data)) == 0): 
-                    sockets_list.remove(socks)
-                    continue
+                if (len(bytes(data)) == 0):
+                    servers.remove(socks)
+                    break
                 
                 msgDict = pickle.loads(data)
 
