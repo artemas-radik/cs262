@@ -93,6 +93,7 @@ if __name__ == "__main__":
             server.send(pickled)
         
     #listen for messages
+    end_test = False
     while True:
         sockets_list = [sys.stdin] + list(servers)
         read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
@@ -137,7 +138,12 @@ if __name__ == "__main__":
                                     
             #command received from user
             else:
+                if end_test: continue
                 l = sys.stdin.readline().strip()
+                if not l:
+                    end_test = True
+                    break
+                #print("debug", l)
                 guid = str(uuid.uuid4())
                 m = {'guid': guid, 'msg': l.encode('utf-8')}
                 pickled = pickle.dumps(m)

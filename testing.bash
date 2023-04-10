@@ -1,5 +1,7 @@
 #thanks https://stackoverflow.com/questions/48591219/open-multiple-terminal-windows-mac-using-bash-script
 shopt -s nocasematch
+diff="diff -iad"
+
 read -p " Execute script? (y/n): " response
 if [[ $response == y ]]; then
     printf " Loading....\\n"
@@ -17,21 +19,23 @@ if [[ $response == y ]]; then
         osascript -e "tell application \"Terminal\" to do script \"cd $dir; python3 client.py 127.0.0.1 6050 6060 6070 $pending_file < $file_in > $file_out \"" #>/dev/null #echo register sara pass | /dev/stdin
     done
 fi
-result=1
-expected=1
-if [[ "${result}" == "${expected}" ]]; then
-  echo "Test 1 passed!"
-else
+result="test_cases_out0.txt"
+expected="no_error_out.txt"
+$diff "$result" "$expected" >/dev/null
+e_code=$?
+if [[ $e_code != 0 ]]; then
   echo "Test 1 failed!"
-  exit 1
-fi
-result=1
-expected=1
-if [[ "${result}" == "${expected}" ]]; then
-  echo "Test 2 passed!"
 else
+  echo "Test 1 passed!"
+fi
+result="test_cases_out1.txt"
+expected="no_error_in1.txt"
+$diff "$result" "$expected" >/dev/null
+e_code=$?
+if [[ $e_code != 0 ]];  then
   echo "Test 2 failed!"
-  exit 1
+else
+  echo "Test 2 passed!"
 fi
 result=1
 expected=1
